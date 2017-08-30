@@ -1,18 +1,16 @@
+$(if $(CRYPTO_FEATURES),,\
+	$(eval CRYPTO_FEATURES = frequency ceasar affine))
+
 # Define path to this lib
-pwd_crypto := $(CRYPTO_ROOT)/libcrypto
-$(info Including crypto algorithms at $(pwd_crypto))
+PWD_CRYPTO := $(CRYPTO_ROOT)/libcrypto
+$(info Including crypto algorithms at $(PWD_CRYPTO))
+
+# Feature files fill OBJS_CRYPTO, add to INCLUDES, and define recipies for specific objects
+$(foreach feature,$(CRYPTO_FEATURES),$(eval include $(PWD_CRYPTO)/$(feature)/feature.mk))
 
 # Set up object files for this lib
-objs_crypto = algotest.o
-LIB_OBJECTS += $(objs_crypto)
+LIB_OBJECTS += $(OBJS_CRYPTO)
 INCLUDED_LIBS += crypto
-INCLUDES += -I$(pwd_crypto)/cryptoalgorithmsbase/headers
-
-include $(CRYPTO_ROOT)/libgmpmods/include.mk
 
 # Define recipe for this build
-crypto: $(objs_crypto)
-
-# Define recipes for objects in this lib
-$(objs_crypto): %.o: $(pwd_crypto)/cryptoalgorithmsbase/src/%.cpp
-	$(CC) -c $(CFLAGS) $(INCLUDES) $^ -o $(OBJECTS_DIR)/$@
+crypto: $(OBJS_CRYPTO) $(HDRS_CRYPTO)
