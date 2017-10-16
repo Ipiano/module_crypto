@@ -1,5 +1,5 @@
 $(if $(LIBCRYPTO_FEATURES),,\
-	$(eval LIBCRYPTO_FEATURES = frequency ceasar affine))
+	$(eval LIBCRYPTO_FEATURES = frequency affine))
 
 # Define path to this lib
 PWD_CRYPTO := $(CRYPTO_ROOT)/libcrypto
