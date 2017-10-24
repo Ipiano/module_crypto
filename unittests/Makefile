@@ -2,6 +2,8 @@
 CC = g++
 CFLAGS += --std=c++11 -O1
 
+TARGET = unittests_modulecrypto
+
 PROJECT_ROOT = $(PWD)/..
 CRYPTO_ROOT = $(PROJECT_ROOT)
 CRYPTO_LIBS = random classiccrypto cryptomath
@@ -20,9 +22,9 @@ LIBS += -lm -lpthread -lgmpxx -lgmp -L$(LIBS_DIR)
 # Change all output directories
 debug: CFLAGS += -g -DDEBUG
 debug: BUILD_TYPE = debug
-debug: release
+debug: $(TARGET)
 
-release: unittests_modulecrypto
+release: $(TARGET)
 
 # Include necessary headers and either sources or libraries
 include $(CRYPTO_ROOT)/include.mk
@@ -38,9 +40,13 @@ mkdirs:
 	@-mkdir -p $(LIBS_DIR)
 	@-mkdir -p $(DEST_DIR)
 
+clean_debug: BUILD_TYPE = debug
+clean_debug: clean
+clean_release: clean
 clean:
-	rm $(PWD)/*.o
-	rm $(OBJECTS_DIR)/*.o
+	@-rm $(OBJECTS_DIR)/*.o
+	@-rm $(LIBS_DIR)/*.a
+	@-rm $(DEST_DIR)/$(TARGET)
 
 tests_cryptomath = test_extgcd.o test_gcd.o test_inversemod.o test_mod.o
 $(tests_cryptomath): %.o: tests/cryptomath/%.cpp
@@ -49,8 +55,8 @@ $(tests_cryptomath): %.o: tests/cryptomath/%.cpp
 objs_main = main.o $(tests_cryptomath)
 
 # Substitute objects location onto object files from internal libs
-unittests_modulecrypto: build_objects = $(patsubst %.o, $(OBJECTS_DIR)/%.o, $(objs_main) $(LIB_OBJECTS))
-unittests_modulecrypto: mkdirs $(objs_main) $(INCLUDED_LIBS)
+$(TARGET): build_objects = $(patsubst %.o, $(OBJECTS_DIR)/%.o, $(objs_main) $(LIB_OBJECTS))
+$(TARGET): mkdirs $(objs_main) $(INCLUDED_LIBS)
 	$(CC) $(build_objects) $(LIBS) -o $(DEST_DIR)/$@
 
 main.o: main.cpp
