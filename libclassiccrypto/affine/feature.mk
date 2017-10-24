@@ -1,11 +1,11 @@
 # Define path to this lib
-pwd_affine := $(PWD_CRYPTO)/affine
+pwd_affine := $(PWD_CLASSICCRYPTO)/affine
 
 # Set up object files for this lib
 objs_affine = affinecipher.o
-OBJS_CRYPTO += $(objs_affine)
+OBJS_CLASSICCRYPTO += $(objs_affine)
 #hdrs_frequency = freq_count.h
-#HDRS_CRYPTO += $(hdrs_frequency)
+#HDRS_CLASSICCRYPTO += $(hdrs_frequency)
 INCLUDES += -I$(pwd_affine)/headers
 
 # Define recipes for objects in this lib

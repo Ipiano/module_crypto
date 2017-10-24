@@ -4,27 +4,25 @@ CFLAGS += --std=c++11 -O1
 
 PROJECT_ROOT = $(PWD)/..
 CRYPTO_ROOT = $(PROJECT_ROOT)
-CRYPTO_LIBS = random crypto cryptomath
+CRYPTO_LIBS = random classiccrypto cryptomath
 LIBRANDOM_FEATURES = bbs
-LIBCRYPTO_FEATURES = affine frequency
+LIBCLASSICCRYPTO_FEATURES = affine frequency
 
-BUILD_DIR = $(PROJECT_ROOT)/build/release
+BUILD_TYPE = release
+BUILD_DIR = $(PROJECT_ROOT)/build/$(BUILD_TYPE)
 OBJECTS_DIR = $(BUILD_DIR)/objects
 LIBS_DIR = $(BUILD_DIR)/lib
-DEST_DIR = $(BUILD_DIR)
+DEST_DIR = $(PWD)/$(BUILD_TYPE)
 
 LIBS += -lm -lpthread -lgmpxx -lgmp -L$(LIBS_DIR)
 
 # Build debug mode by default
 # Change all output directories
 debug: CFLAGS += -g -DDEBUG
-debug: BUILD_DIR = $(PROJECT_ROOT)/build/debug
-debug: OBJECTS_DIR = $(BUILD_DIR)/objects
-debug: LIBS_DIR = $(BUILD_DIR)/lib
-debug: DEST_DIR = $(BUILD_DIR)
-debug: all
+debug: BUILD_TYPE = debug
+debug: release
 
-all: unittests_modulecrypto
+release: unittests_modulecrypto
 
 # Include necessary headers and either sources or libraries
 include $(CRYPTO_ROOT)/include.mk
@@ -38,6 +36,7 @@ mkdirs:
 	@-mkdir -p $(BUILD_DIR)
 	@-mkdir -p $(OBJECTS_DIR)
 	@-mkdir -p $(LIBS_DIR)
+	@-mkdir -p $(DEST_DIR)
 
 clean:
 	rm $(PWD)/*.o

@@ -1,11 +1,11 @@
 # Define path to this lib
-pwd_frequency := $(PWD_CRYPTO)/frequency
+pwd_frequency := $(PWD_CLASSICCRYPTO)/frequency
 
 # Set up object files for this lib
 #objs_frequency = 
-#OBJS_CRYPTO += $(objs_frequency)
+#OBJS_CLASSICCRYPTO += $(objs_frequency)
 hdrs_frequency = freq_count.h
-HDRS_CRYPTO += $(hdrs_frequency)
+HDRS_CLASSICCRYPTO += $(hdrs_frequency)
 INCLUDES += -I$(pwd_frequency)/headers
 
 # Define recipes for objects in this lib
