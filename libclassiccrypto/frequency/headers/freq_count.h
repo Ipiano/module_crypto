@@ -7,30 +7,44 @@
 
 namespace frequency
 {
-    template<class InIterator, class OutIterator, class T>
+    //Typedefs for function inputs
+    template<class T>
+    using incrementer = std::function<void(T&)>;
+
+    template<class T>
+    using mapper = std::function<uint64_t(const T&)>;
+
+    //Core frequency counter
+    //Uses mapper and incrementer to output data into
+    //the output container
+    template<class InIterator, class OutIterator, class I, class O>
     void countFrequencies(InIterator start, const InIterator& end, OutIterator out,
-                          std::function<uint64_t(const T&)> mapFun = [](const T& v){return (uint64_t)v;})
+                          incrementer<O> incFn, mapper<I> mapFn)
     {
         while(start != end)
-            (*(out + mapFun(*(start++))))++;
+            incFn(*(out + mapFn(*(start++))));
     }
 
-    template<class Iterator>    
-    void countFrequencies(const std::string& text, Iterator out, bool caseSensitive = false)
+    //Convenience override
+    //Frequency counter for a string of text
+    template<class Iterator, class O>    
+    void countFrequencies(const std::string& text, Iterator out, incrementer<O> incFn, bool caseSensitive = false)
     {
         countFrequencies<std::string::const_iterator, 
-                         Iterator, char>(text.cbegin(), text.cend(), out,
-                                        [=](const char& v){
-                                            return caseSensitive ? (uint8_t)v : tolower((uint8_t)v);
-                                        });
+                         Iterator, char, O>(text.cbegin(), text.cend(), out, incFn,
+                                           [=](const char& v){
+                                               return caseSensitive ? (uint8_t)v : tolower((uint8_t)v);
+                                           });
     }
 
-    template<class Iterator>    
-    void countFrequencies(std::istream& input, Iterator out, bool caseSensitive = false)
+    //Convenience override
+    //Frequency counter for an ifstream
+    template<class Iterator, class O>    
+    void countFrequencies(std::istream& input, Iterator out, incrementer<O> incFn, bool caseSensitive = false)
     {
         std::string line;
         while(input >> line)
-            countFrequencies(line, out, caseSensitive);
+            countFrequencies(line, out, incFn, caseSensitive);
     }
 
 }
