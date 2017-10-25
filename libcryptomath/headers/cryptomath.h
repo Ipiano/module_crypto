@@ -20,7 +20,6 @@ namespace cryptomath
 template<class Integral>
 Integral mod(const Integral& a, const Integral& b)
 {
-    DBGOUT(a << " (mod " << b << ")")
     if(b < 0) return -mod<Integral>(-a, -b);
     if(a < 0)
     {
@@ -28,6 +27,7 @@ Integral mod(const Integral& a, const Integral& b)
         return t == 0 ? t : b - t;
     }
 
+    DBGOUT(a << " (mod " << b << ") = " << a % b);
     return a % b;
 }
 

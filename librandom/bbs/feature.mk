@@ -1,6 +1,9 @@
 # Define path to this lib
 pwd_bbs := $(PWD_RANDOM)/bbs
 
+CRYPTO_LIBS += cryptomath
+include $(CRYPTO_ROOT)/include.mk
+
 # Set up object files for this lib
 #objs_bbs = bbs.o
 #OBJS_CRYPTO += $(objs_bbs)

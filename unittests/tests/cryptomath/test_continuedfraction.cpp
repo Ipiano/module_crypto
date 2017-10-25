@@ -18,7 +18,7 @@ TEST_CASE("Double to continued fraction")
     {
         result = dtocf(0);
 
-        REQUIRE(result == (vector<uint64_t>{0}));\
+        REQUIRE(result == (vector<uint64_t>{0}));
     };
 
     SECTION("1 to continued fraction")
