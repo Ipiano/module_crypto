@@ -49,20 +49,6 @@ TEST_CASE("Double to continued fraction")
         REQUIRE(result == (vector<uint64_t>{23, 3, 3333, 7778288}));
     };
 
-    SECTION("sqrt(7) to continued fraction")
-    {
-        result = dtocf(sqrt(7), 7);
-
-        REQUIRE(result == (vector<uint64_t>{2, 1, 1, 1, 4, 1, 1, 1}));
-    };
-
-    SECTION("sqrt(3) to continued fraction")
-    {
-        result = dtocf(sqrt(3), 7);
-
-        REQUIRE(result == (vector<uint64_t>{1, 1, 2, 1, 2, 1, 2, 1}));
-    };
-
     SECTION("pi to continued fraction")
     {
         result = dtocf(pi, 3);
@@ -123,6 +109,46 @@ TEST_CASE("Fraction to continued fraction")
     };
 };
 
+TEST_CASE("Continued fractions of simple square roots")
+{
+    vector<uint64_t> result;
+
+    SECTION("sqrt(7) to continued fraction")
+    {
+        result = sqrttocf(7);
+
+        REQUIRE(result == (vector<uint64_t>{2, 1, 1, 1, 4}));
+    };
+
+    SECTION("sqrt(3) to continued fraction")
+    {
+        result = sqrttocf(3);
+
+        REQUIRE(result == (vector<uint64_t>{1, 1, 2}));
+    };
+
+    SECTION("sqrt(0) to continued fraction")
+    {
+        result = sqrttocf(0);
+
+        REQUIRE(result == (vector<uint64_t>{0}));
+    };
+
+    SECTION("sqrt(1) to continued fraction")
+    {
+        result = sqrttocf(1);
+
+        REQUIRE(result == (vector<uint64_t>{1}));
+    };
+
+    SECTION("sqrt(4) to continued fraction")
+    {
+        result = sqrttocf(4);
+
+        REQUIRE(result == (vector<uint64_t>{2}));
+    };
+}
+
 TEST_CASE("Continued fraction to approximation")
 {
     vector<pair<uint64_t, uint64_t>> result;
@@ -164,16 +190,16 @@ TEST_CASE("Continued fraction to approximation")
 
     SECTION("sqrt(7) to continued fraction approximation")
     {
-        result = cftof(vector<uint64_t>{2, 1, 1, 1, 4, 1, 1, 1});
+        result = cftof(vector<uint64_t>{2, 1, 1, 1, 4}, 1);
 
-        REQUIRE(result == (vector<pair<uint64_t, uint64_t>>{{2, 1}, {3, 1}, {5, 2}, {8, 3}, {37, 14}, {45, 17}, {82, 31}, {127, 48}}));
+        REQUIRE(result == (vector<pair<uint64_t, uint64_t>>{{2, 1}, {3, 1}, {5, 2}, {8, 3}, {37, 14}, {45, 17}, {82, 31}, {127, 48}, {590, 223}}));
     };
 
     SECTION("sqrt(3) to continued fraction approximation")
     {
-        result = cftof(vector<uint64_t>{1, 1, 2, 1, 2, 1, 2, 1});
+        result = cftof(vector<uint64_t>{1, 1, 2}, 3);
 
-        REQUIRE(result == (vector<pair<uint64_t, uint64_t>>{{1, 1}, {2, 1}, {5, 3}, {7, 4}, {19, 11}, {26, 15}, {71, 41}, {97, 56}}));
+        REQUIRE(result == (vector<pair<uint64_t, uint64_t>>{{1, 1}, {2, 1}, {5, 3}, {7, 4}, {19, 11}, {26, 15}, {71, 41}, {97, 56}, {265, 153}}));
     };
 
     SECTION("pi to continued fraction approximation")
@@ -266,16 +292,16 @@ TEST_CASE("Continued fraction to double")
 
     SECTION("sqrt(7) from continued fraction")
     {
-        result = cftod(vector<uint64_t>{2, 1, 1, 1, 4, 1, 1, 1});
+        result = cftod(vector<uint64_t>{2, 1, 1, 1, 4}, 10);
 
-        REQUIRE(result == Approx(sqrt(7)).margin(0.001));
+        REQUIRE(result == Approx(sqrt(7)));
     };
 
     SECTION("sqrt(3) from continued fraction")
     {
-        result = cftod(vector<uint64_t>{1, 1, 2, 1, 2, 1, 2, 1});
+        result = cftod(vector<uint64_t>{1, 1, 2}, 10);
 
-        REQUIRE(result == Approx(sqrt(3)).margin(0.001));
+        REQUIRE(result == Approx(sqrt(3)));
     };
 
     SECTION("pi as continued fraction")
