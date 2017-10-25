@@ -11,6 +11,9 @@
     #define DBGOUT(a) std::cerr << a << std::endl;
 #endif
 
+namespace cryptomath
+{
+
 //Returns a (mod b)
 //Since c++ % operator doesn't quite handle negative numbers
 //as needed for working in Z_p
@@ -101,6 +104,8 @@ Integral inverseMod(const Integral& a, const Integral& n)
         return mod<Integral>(sln[1], n);
     }
     return 0;
+}
+
 }
 
 #endif

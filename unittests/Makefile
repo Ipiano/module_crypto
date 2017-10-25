@@ -1,6 +1,7 @@
 # General variables
 CC = g++
 CFLAGS += --std=c++11 -O1
+CXXFLAGS = CFLAGS
 
 TARGET = unittests_modulecrypto
 
@@ -48,7 +49,7 @@ clean:
 	@-rm $(LIBS_DIR)/*.a
 	@-rm $(DEST_DIR)/$(TARGET)
 
-tests_cryptomath = test_extgcd.o test_gcd.o test_inversemod.o test_mod.o
+tests_cryptomath = test_extgcd.o test_gcd.o test_inversemod.o test_mod.o test_continuedfraction.o
 $(tests_cryptomath): %.o: tests/cryptomath/%.cpp
 	$(CC) -c $(CFLAGS) $(INCLUDES) $^ -o $(OBJECTS_DIR)/$@
 

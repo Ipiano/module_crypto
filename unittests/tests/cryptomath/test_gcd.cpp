@@ -5,6 +5,7 @@
 #include <gmpxx.h>
 
 using namespace std;
+using namespace cryptomath;
 
 TEST_CASE("The gcd function")
 {
