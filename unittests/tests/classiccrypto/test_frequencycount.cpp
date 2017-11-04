@@ -1,3 +1,4 @@
+/*! @file */ 
 #include "../../catch.hpp"
 
 #include "freq_count.h"
@@ -11,7 +12,7 @@
 using namespace std;
 using namespace frequency;
 
-TEST_CASE("Frequency count using array in/output")
+TEST_CASE("Frequency count using array output")
 {
     SECTION("Input non-string")
     {
@@ -156,7 +157,7 @@ TEST_CASE("Frequency count using array in/output")
     }
 };
 
-TEST_CASE("Frequency count using vector of custom type")
+TEST_CASE("Frequency count using vector of custom type output")
 {
     struct data
     {

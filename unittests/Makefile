@@ -5,6 +5,7 @@ CXXFLAGS = CFLAGS
 
 TARGET = unittests_modulecrypto
 
+DEFINES += -DCRYPTOMATH_GMP
 PROJECT_ROOT = $(PWD)/..
 CRYPTO_ROOT = $(PROJECT_ROOT)
 CRYPTO_LIBS = random classiccrypto cryptomath
@@ -21,7 +22,8 @@ LIBS += -lm -lpthread -lgmpxx -lgmp -L$(LIBS_DIR)
 
 # Build debug mode by default
 # Change all output directories
-debug: CFLAGS += -g -DDEBUG
+debug: CFLAGS += -g
+debug: DEFINES += -DDEBUG
 debug: BUILD_TYPE = debug
 debug: $(TARGET)
 
@@ -49,17 +51,18 @@ clean:
 	@-rm $(LIBS_DIR)/*.a
 	@-rm $(DEST_DIR)/$(TARGET)
 
-tests_cryptomath = test_extgcd.o test_gcd.o test_inversemod.o test_mod.o test_continuedfraction.o
+tests_cryptomath = test_extgcd.o test_gcd.o test_inversemod.o test_mod.o test_continuedfraction.o\
+				   test_factor2s.o test_isprime.o
 $(tests_cryptomath): %.o: tests/cryptomath/%.cpp
-	$(CC) -c $(CFLAGS) $(INCLUDES) $^ -o $(OBJECTS_DIR)/$@
+	$(CC) -c $(CFLAGS) $(DEFINES) $(INCLUDES) $^ -o $(OBJECTS_DIR)/$@
 
 tests_classiccrypto = test_frequencycount.o
 $(tests_classiccrypto): %.o: tests/classiccrypto/%.cpp
-	$(CC) -c $(CFLAGS) $(INCLUDES) $^ -o $(OBJECTS_DIR)/$@
+	$(CC) -c $(CFLAGS) $(DEFINES) $(INCLUDES) $^ -o $(OBJECTS_DIR)/$@
 
 tests_random = test_bbs.o
 $(tests_random): %.o: tests/random/%.cpp
-	$(CC) -c $(CFLAGS) $(INCLUDES) $^ -o $(OBJECTS_DIR)/$@
+	$(CC) -c $(CFLAGS) $(DEFINES) $(INCLUDES) $^ -o $(OBJECTS_DIR)/$@
 
 objs_main = main.o $(tests_cryptomath) $(tests_classiccrypto) $(tests_random)
 
@@ -69,4 +72,4 @@ $(TARGET): mkdirs $(objs_main) $(INCLUDED_LIBS)
 	$(CC) $(build_objects) $(LIBS) -o $(DEST_DIR)/$@
 
 main.o: main.cpp
-	$(CC) -c $(CFLAGS) $(INCLUDES) main.cpp -o $(OBJECTS_DIR)/main.o
+	$(CC) -c $(CFLAGS) $(DEFINES) $(INCLUDES) main.cpp -o $(OBJECTS_DIR)/main.o

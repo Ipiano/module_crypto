@@ -1,3 +1,4 @@
+/*! @file */ 
 #include "../../catch.hpp"
 
 #include "cryptomath.h"
@@ -7,7 +8,7 @@
 using namespace std;
 using namespace cryptomath;
 
-TEST_CASE("The gcd function")
+TEST_CASE("Gcd edge cases")
 {
     SECTION("GCD(0, 10)")
     {
@@ -26,7 +27,9 @@ TEST_CASE("The gcd function")
         unsigned int soln = gcd(0, 0);
         REQUIRE(soln == 0);
     }
-
+}
+TEST_CASE("The gcd function")
+{
     SECTION("GCD(482, 1180)")
     {
         unsigned int soln = gcd(482, 1180);

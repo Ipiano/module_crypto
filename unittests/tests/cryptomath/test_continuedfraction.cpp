@@ -1,3 +1,4 @@
+/*! @file */ 
 #include "../../catch.hpp"
 
 #include "continuedfractions.h"

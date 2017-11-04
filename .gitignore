@@ -33,3 +33,5 @@
 
 */release/*
 */debug/*
+/build
+/doc
