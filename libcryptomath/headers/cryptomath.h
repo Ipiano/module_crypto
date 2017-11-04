@@ -5,6 +5,7 @@
 #include <cmath>
 #include <algorithm>
 #include <unordered_map>
+#include <map>
 #include <queue>
 #include <random>
 #include <limits>
@@ -42,7 +43,7 @@ Integral mod(const Integral& a, const Integral& b)
         return t == 0 ? t : b - t;
     }
 
-    DBGOUT(a << " (mod " << b << ") = " << a % b);
+    //DBGOUT(a << " (mod " << b << ") = " << a % b);
     return a % b;
 }
 
@@ -61,7 +62,7 @@ Integral mod(const Integral& a, const Integral& b)
 template<class Integral>
 Integral _unsignedgcd(const Integral& a, const Integral& b)
 {
-    DBGOUT("GCD(" << a << ", " << b << ")")
+    //DBGOUT("GCD(" << a << ", " << b << ")")
     Integral modAb = a % b;
     return modAb == 0 ? b : _unsignedgcd<Integral>(b, modAb);
 }
@@ -80,7 +81,7 @@ Integral gcd(Integral a, Integral b)
 {
     using std::abs;
 
-    DBGOUT("GCD(" << a << ", " << b << ")")    
+    //DBGOUT("GCD(" << a << ", " << b << ")")    
     //If a or b is negative, make them positive
     //and run unsigned gcd
     a = abs(a);
@@ -202,10 +203,6 @@ Integral _powMod(Integral a, Integral b, const Integral& n) {
 
     while (b > 0)
     {
-        DBGOUT("b = " << b);
-        DBGOUT("a = " << a);
-        DBGOUT("r = " << result);
-
         if (b % 2 == 1)
             result = mod<Integral>((result * a), n);
         a = mod<Integral>((a * a), n);
@@ -272,12 +269,8 @@ std::pair<Integral, Integral> factor2s(const Integral& n)
     Integral r = 0;
     while((d % 2) == 0)
     {
-        DBGOUT("Fac: " << fac);
-        DBGOUT("LG2: " << lg2);
         while(d % fac == 0)
         {
-            DBGOUT("D: " << d);
-            DBGOUT("R: " << r);
 
             d = d / fac;
             r = r + lg2;
@@ -285,10 +278,8 @@ std::pair<Integral, Integral> factor2s(const Integral& n)
         fac = fac / 2;
         lg2 = lg2 - 1;
     }
-
-    DBGOUT("D: " << d);
-    DBGOUT("R: " << r);
     
+    DBGOUT(r << ", " << d);
     return std::make_pair(r, d);
 }
 
@@ -299,7 +290,8 @@ std::pair<Integral, Integral> factor2s(const Integral& n)
 template<class Integral>
 bool isPrime(const Integral& n, const uint64_t& iterations = 10)
 {
-    if(n == 2) return true;
+    DBGOUT("isprime(" << n << ")");
+    if(n == 2 || n == 3) return true;
     if(n < 3 || n%2 == 0) return false;
 
     std::mt19937_64 reng;
@@ -312,22 +304,18 @@ bool isPrime(const Integral& n, const uint64_t& iterations = 10)
     for(int i=0; i<iterations; i++)
     {
         uint64_t a_ = dist(reng);
-        Integral a = mod<Integral>(Integral(a_), n-4) + 2;
-        DBGOUT("a_ = " << a_ << " a = " << a);
 
+        Integral a = mod<Integral>(Integral(a_), n-4) + 2;
         Integral x = powMod<Integral>(a, d, n);
         bool n1;       
-        DBGOUT("x0 = " << x); 
         if(x != 1 && x != n-1)
         {
             n1 = false;
             for(int j=1; j<r; j++)
             {
-                DBGOUT("j: " << j << " x = " << x);
                 x = powMod<Integral>(x, 2, n);
                 if(x == 1)
                 {
-                    DBGOUT("x == 1");
                     return false;
                 }
                 if(x == n-1)
@@ -338,7 +326,6 @@ bool isPrime(const Integral& n, const uint64_t& iterations = 10)
             }
             if(!n1)
             {
-                DBGOUT("!n1");
                 return false;
             }
         }
@@ -368,28 +355,88 @@ namespace factoring
     template <class Integral>
     std::pair<Integral, Integral> fermat(const Integral& n)
     {
-        Integral a = sqrtfloor(n);
+        DBGOUT("Fermat factor " << n);
+        Integral a = sqrtfloor<Integral>(n);
         Integral b2 = a*a - n;
-
-        while(b2 < 0 || powInt(sqrtfloor(b2), 2) != b2)
+        
+        while(a*a < n || powInt<Integral>(sqrtfloor<Integral>(b2), 2) != b2)
         {
-            a++;
+            a = a + 1;
             b2 = a*a - n;
+            DBGOUT(a << ", " << b2);
         }
 
-        return std::make_pair(a + sqrt(b2), a - sqrt(b2)); 
+        return std::make_pair(a + sqrtfloor<Integral>(b2), a - sqrtfloor<Integral>(b2)); 
+    }
+
+    template <class Integral>
+    Integral pRho1(const Integral& a)
+    {
+        return a*a + 1;
+    }
+
+    template <class Integral>
+    Integral pRho2(const Integral& a)
+    {
+        return a*a - 1;
     }
 
     template <class Integral>
     std::pair<Integral, Integral> pollardrho(const Integral& n)
     {
-        
+        std::vector<std::function<Integral(const Integral&)>> PRhoFuncs {
+            pRho1<Integral>,
+            pRho2<Integral>};
+
+        DBGOUT("Factor pollardrho " << n);
+        for(Integral a_ = 2; ; a_++)
+        {
+            DBGOUT("a -> " << a_);
+            for(auto g : PRhoFuncs)
+            {
+                Integral b = 2;
+                Integral d = 1;
+                Integral a = a_;
+                while(d == 1)
+                {
+                    DBGOUT("a " << a);
+                    DBGOUT("g(a) " << g(a));                    
+                    a = g(a);
+                    b = g(g(b));
+                    d = gcd<Integral>(a-b, n);
+                    DBGOUT(a << " " << b << " " << d);
+                }
+                if(d != n) return std::pair<Integral, Integral>(d, n/d);
+            }
+        }
     }
 
     template <class Integral>
     std::pair<Integral, Integral> pollardp1(const Integral& n)
     {
-        
+        DBGOUT("Factor pollardrp1 " << n);        
+        Integral s = 2;
+        Integral b_initial = 2;
+        while(true)
+        {
+            Integral b = b_initial;
+            for(Integral j = 2; j < s-1; j++)
+            {
+                b = powMod<Integral>(b, j, n);
+            }
+            for(Integral j = s-1; j < n; j++)
+            {
+                b = powMod<Integral>(b, j, n);            
+                DBGOUT("b = " << b);
+                Integral d = gcd<Integral>(b-1, n);
+                DBGOUT("d = " << d);
+                if(1 < d && d < n) return std::pair<Integral, Integral>(d, n/d);
+            }
+            do
+            {
+                b_initial++;
+            }while(gcd(b_initial, n) != 1);
+        }
     }
 }
 
@@ -397,25 +444,36 @@ enum class Factor_Method{Fermat, PollardRho, PollardP_1};
 template <class Integral>
 std::vector<Integral> factor(const Integral& n, const Factor_Method& m)
 {
-    const static std::unordered_map<Factor_Method, std::function<std::pair<Integral, Integral>(const Integral&)>> algos =
+    const static std::map<Factor_Method, std::function<std::pair<Integral, Integral>(const Integral&)>> algos
     {
-        {Factor_Method::Fermat, factoring::fermat},
-        {Factor_Method::PollardRho, factoring::pollardrho},
-        {Factor_Method::PollardP_1, factoring::pollardp1}
+        {Factor_Method::Fermat, factoring::fermat<Integral>},
+        {Factor_Method::PollardRho, factoring::pollardrho<Integral>},
+        {Factor_Method::PollardP_1, factoring::pollardp1<Integral>}
     };
 
+    if(n == 1 || n == 0) return std::vector<Integral>{n};
+
     auto algo = algos.at(m);
-    std::queue<Integral> composites { n };
+    std::queue<Integral> composites;
+    composites.push(n);
+
     std::vector<Integral> out;
 
-    while(composites)
+    while(composites.size())
     {
         Integral i = composites.front();
-        if(isPrime(i))
+        if(isPrime<Integral>(i))
         {
             out.push_back(i);
         }
-        else
+        else if(i % 2 == 0)
+        {
+            auto p = factor2s<Integral>(i);
+            for(int j=0; j<p.first; j++)
+                out.push_back(2);
+            composites.push(p.second);
+        }
+        else if(i > 1)
         {
             std::pair<Integral, Integral> factors = algo(i);
             composites.push(factors.first);

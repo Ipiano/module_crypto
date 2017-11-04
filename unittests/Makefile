@@ -1,6 +1,6 @@
 # General variables
 CC = g++
-CFLAGS += --std=c++11 -O1
+CFLAGS += --std=c++11
 CXXFLAGS = CFLAGS
 
 TARGET = unittests_modulecrypto
@@ -27,6 +27,7 @@ debug: DEFINES += -DDEBUG
 debug: BUILD_TYPE = debug
 debug: $(TARGET)
 
+release: CFLAGS += -O2
 release: $(TARGET)
 
 # Include necessary headers and either sources or libraries
@@ -52,7 +53,7 @@ clean:
 	@-rm $(DEST_DIR)/$(TARGET)
 
 tests_cryptomath = test_extgcd.o test_gcd.o test_inversemod.o test_mod.o test_continuedfraction.o\
-				   test_factor2s.o test_isprime.o
+				   test_factor2s.o test_isprime.o test_factor.o
 $(tests_cryptomath): %.o: tests/cryptomath/%.cpp
 	$(CC) -c $(CFLAGS) $(DEFINES) $(INCLUDES) $^ -o $(OBJECTS_DIR)/$@
 

@@ -78,17 +78,16 @@ namespace bbs
             p = abs(p);
             q = abs(q);
 
-            /*! @todo Switch bbs engine primality test to the one in cryptomath lib */
             //Check that p and q are (probably) prime
-            if(! mpz_probab_prime_p(p.get_mpz_t(), prime_reps) ||
-               ! mpz_probab_prime_p(q.get_mpz_t(), prime_reps))
+            if(! cryptomath::isPrime(p, prime_reps) ||
+               ! cryptomath::isPrime(q, prime_reps))
             {
                 throw std::domain_error("p or q is not prime");
             }
             
             //Check that p and q are congruent to 3 (mod 4)
-            if(p % mpz_class(4) != mpz_class(3) ||
-               q % mpz_class(4) != mpz_class(3))
+            if(p % 4 != 3 ||
+               q % 4 != 3)
             {
                 throw std::domain_error("p or q is not congruent to 3(mod 4)");                
             }
@@ -138,10 +137,12 @@ namespace bbs
         result_type operator ()()
         {
             result_type out;
+            mpz_class x = x_prev;
 
             for(int i=0; i<bits; i++)
             {
-                out |= (mpz_tstbit(gmpt(x_prev), i) << i);
+                out |= (x % 2) << i;
+                x = x / 2;
             }
 
             //Increment state
