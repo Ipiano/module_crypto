@@ -7,7 +7,7 @@
 #include <vector>
 #include <algorithm>
 #include <cmath>
-#include <exception>
+#include <stdexcept>
 
 using namespace std;
 
@@ -75,7 +75,7 @@ vector<uint64_t> ftocf(uint64_t p, uint64_t q)
     DBG(cerr << "Continued fraction of " << p << " / " << q << endl)
 
     if(q == 0)
-        throw invalid_argument("divide by 0");
+        throw logic_error("divide by 0");
 
     uint64_t a = p/q;
     p = p%q;

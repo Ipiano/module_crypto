@@ -9,6 +9,8 @@
 #include <queue>
 #include <random>
 #include <limits>
+#include <functional>
+#include <cmath>
 
 #ifdef CRYPTOMATH_GMP
 #include <gmpxx.h>
@@ -67,6 +69,22 @@ Integral _unsignedgcd(const Integral& a, const Integral& b)
     return modAb == 0 ? b : _unsignedgcd<Integral>(b, modAb);
 }
 
+template<class Integral>
+Integral abs(const Integral& a){ 
+    using std::abs;
+    return abs(a);
+}
+
+
+template<>
+uint64_t inline abs<uint64_t>(const uint64_t& a){ return a; }
+
+template<>
+uint32_t inline abs<uint32_t>(const uint32_t& a){ return a; }
+
+template<>
+uint8_t inline abs<uint8_t>(const uint8_t& a){ return a; }
+
 /*! @brief Computes gcd(|a|, |b|).
  *
  * If a or b is 0, the other is returned. gcd(0, 0) returns 0.
@@ -79,8 +97,6 @@ Integral _unsignedgcd(const Integral& a, const Integral& b)
 template <class Integral>
 Integral gcd(Integral a, Integral b)
 {
-    using std::abs;
-
     //DBGOUT("GCD(" << a << ", " << b << ")")    
     //If a or b is negative, make them positive
     //and run unsigned gcd
@@ -110,7 +126,6 @@ Integral gcd(Integral a, Integral b)
 template <class Integral>
 std::array<Integral, 3> extendedGcd(Integral a_, Integral b_)
 {
-    using std::abs;
     using std::swap;
 
     DBGOUT("Ext GCD(" << a_ << ", " << b_ << ")")
@@ -484,6 +499,75 @@ std::vector<Integral> factor(const Integral& n, const Factor_Method& m)
 
     std::sort(out.begin(), out.end());
     return out;
+}
+
+/* Source https://math.stackexchange.com/questions/1416422/how-does-one-find-the-primitive-roots-of-a-non-prime-number*/
+template<class Integral>
+bool isPrimitiveRoot(Integral a, const Integral& n)
+{
+    //Get a in the range [0, n)
+    a = mod<Integral> (a, n);
+
+    //Trivial cases
+    if(n == 1) return true;
+    if(n == 2) return false;
+    if(n == 4) return a == 2;
+
+    //Factor n
+    std::vector<Integral> factors = factor<Integral>(n, Factor_Method::PollardRho);
+
+    bool pk2 = false;
+
+    //Guaranteed to be at least one factor
+    //Check if n might be of the form 2p^k
+    if(factors[0] == 2)
+    {
+        pk2 = true;
+        //If 2 is a factor, there's guaranteed to be at least some other factor
+        //because n is not 2
+        factors.erase(factors.begin());
+    }
+
+    //Check that all factors are the same
+    //If so, then n is prime, n is p^k or n is 2p^k
+    //If n is not this form, then there are no primitive roots
+    //mod n
+    Integral p = factors[0];
+    for(const Integral& i : factors)
+    {
+        if(i != p) return false;
+    }
+
+    //Check if a is a primitive root mod the prime factor p of n
+
+    //Factor p-1
+    Integral p1 = p-1;
+    std::vector<Integral> p1factors = factor<Integral>(p1, Factor_Method::PollardRho);
+    for(auto q = p1factors.begin(); q != p1factors.end(); p1factors++)
+    {
+        //Check each unique factor once
+        if(q == p1factors.begin() || *q != *(q-1))
+        {
+            //if a^((p-1)/q) mod p is 1, then it's not a primitive root
+            if(powMod<Integral>(a, p1 / *q, p) == 1) return false;
+        }
+    }
+
+    //We know a is a primitive root of the prime factor p of n. If this is the only factor of
+    //n (n is prime) we are done
+    if(factors.size() == 1 && !pk2) return true;
+
+    //If n is the form 2pk, then if r odd, it's a primitive root; else r + p^k is a primitive root (but not r)
+    if(pk2)
+        return a % 2 == 1;
+
+    //Check if a is a root of p^2, if so it is a root of all p^k
+    Integral p2 = p*p;
+    for(Integral i=2; i<p2-1; i++)
+    {
+        if(powMod<Integral>(a, i, p2) == 1) return false;
+    }
+    return powMod<Integral>(a, p2-1, p2) == 1;
 }
 
 }
