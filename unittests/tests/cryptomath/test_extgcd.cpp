@@ -190,8 +190,8 @@ TEST_CASE("The extended gcd function")
         mpz_class a = 482;
         mpz_class b = 1180;
 
-        array<mpz_class, 3> soln = extendedGcd(a, b);
-        mpz_class ans = gcd(a, b);
+        array<mpz_class, 3> soln = extendedGcd<mpz_class>(a, b);
+        mpz_class ans = gcd<mpz_class>(a, b);
 
         REQUIRE(soln[0] == ans);
         REQUIRE(soln[1]*a + soln[2]*b == soln[0]);
