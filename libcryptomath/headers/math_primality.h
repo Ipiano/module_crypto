@@ -28,7 +28,7 @@ std::pair<Integral, Integral> factor2s(const Integral& n)
     
     Integral d = n;
     Integral r = 0;
-    while((d % 2) == 0)
+    while(mod2<Integral>(d) == 0)
     {
         while(d % fac == 0)
         {
@@ -52,7 +52,7 @@ bool isPrime(const Integral& n, const uint64_t& iterations = 10)
 {
     DBGOUT("isprime(" << n << ")");
     if(n == 2 || n == 3) return true;
-    if(n < 3 || n%2 == 0) return false;
+    if(n < 3 || mod2<Integral>(n) == 0) return false;
 
     std::mt19937_64 reng;
     std::uniform_int_distribution<uint8_t> dist(2);
@@ -99,7 +99,7 @@ Integral nextPrime(Integral start)
     if(start < 2) return 2;
 
     //Get next odd number
-    if(start % 2 == 0) start++;
+    if(mod2<Integral>(start) == 0) start++;
     else start += 2;
 
     //Check all odd numbers > start for next prime

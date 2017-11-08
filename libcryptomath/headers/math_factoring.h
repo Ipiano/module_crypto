@@ -135,7 +135,7 @@ std::vector<Integral> factor(const Integral& n, const Factor_Method& m)
         {
             out.push_back(i);
         }
-        else if(i % 2 == 0)
+        else if(mod2<Integral>(i) == 0)
         {
             auto p = factor2s<Integral>(i);
             for(int j=0; j<p.first; j++)
@@ -214,7 +214,7 @@ bool isPrimitiveRoot(Integral a, const Integral& n)
 
     //If n is the form 2pk, then if r odd, it's a primitive root; else r + p^k is a primitive root (but not r)
     if(pk2)
-        return a % 2 == 1;
+        return mod2<Integral>(a) == 1;
 
     //Check if a is a root of p^2, if so it is a root of all p^k
     Integral p2 = p*p;

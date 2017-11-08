@@ -6,6 +6,8 @@
 #include <vector>
 #include <cmath>
 
+#include "math_misc.h"
+
 #ifndef DBGOUT
 #define DBGOUT(a) 
 #endif
@@ -53,7 +55,7 @@ Integral _powMod(Integral a, Integral b, const Integral& n) {
 
     while (b > 0)
     {
-        if (b % 2 == 1)
+        if (mod2<Integral>(b) == 1)
             result = mod<Integral>((result * a), n);
         a = mod<Integral>((a * a), n);
         b = b / 2;

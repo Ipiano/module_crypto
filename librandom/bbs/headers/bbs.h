@@ -91,7 +91,7 @@ namespace bbs
             //Set n
             m = p*q;  
 
-            uint64_t maxK = cryptomath::log2(cryptomath::log2(m));
+            uint64_t maxK = cryptomath::log2<uint64_t>(cryptomath::log2<Integral>(m));
 
             //Check that we can safely extract bits to fill result_type
             //and be cryptographically secure
@@ -136,7 +136,7 @@ namespace bbs
 
             for(int i=0; i<bits; i++)
             {
-                out |= (x % 2) << i;
+                out = out | (cryptomath::mod2<Integral>(x) << i);
                 x = x / 2;
             }
 

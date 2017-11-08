@@ -15,6 +15,12 @@ namespace cryptomath
 {
 
 template<class Integral>
+uint8_t mod2(const Integral& n)
+{
+    return (uint8_t)(n & 1);
+}
+
+template<class Integral>
 Integral sqrtfloor(const Integral& n)
 {
     return std::sqrt(n);
@@ -27,7 +33,7 @@ Integral powInt(const Integral& a, const Integral& b)
     if(b == 1) return a;
 
     Integral n = powInt<Integral>(a, b/2);
-    if(b % 2 == 1)
+    if(mod2<Integral>(b) == 1)
         return n * n * a;
     return n * n;
 }
@@ -51,6 +57,12 @@ mpz_class inline sqrtfloor<mpz_class>(const mpz_class& n)
     mpz_class out;
     mpz_sqrt(out.get_mpz_t(), n.get_mpz_t());
     return out;
+}
+
+template<>
+uint8_t mod2<mpz_class>(const mpz_class& n)
+{
+    return (uint8_t)(mpz_tstbit(n.get_mpz_t(), 0));
 }
 
 #endif
