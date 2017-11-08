@@ -3,7 +3,9 @@
 
 #include "cryptomath.h"
 
+#ifdef CRYPTOMATH_GMP
 #include <gmpxx.h>
+#endif
 
 using namespace std;
 using namespace cryptomath;
@@ -42,6 +44,7 @@ TEST_CASE("The gcd function")
         REQUIRE(soln == 2);
     }
 
+#ifdef CRYPTOMATH_GMP    
     SECTION("GMP Support: GCD(482, 1180)")
     {
         mpz_class a(1180), b(482);
@@ -55,4 +58,5 @@ TEST_CASE("The gcd function")
         mpz_class soln = gcd<mpz_class>(b, a);
         REQUIRE(soln == 2);
     }
+#endif
 }

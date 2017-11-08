@@ -3,7 +3,9 @@
 
 #include "cryptomath.h"
 
+#ifdef CRYPTOMATH_GMP
 #include <gmpxx.h>
+#endif
 
 using namespace std;
 using namespace cryptomath;
@@ -83,10 +85,12 @@ TEST_CASE("The mod function")
         REQUIRE(soln == 0);
     }
 
+#ifdef CRYPTOMATH_GMP
     SECTION("GMP Support: 5 (mod 3)")
     {
         mpz_class a(5), b(3);
         mpz_class soln = mod<mpz_class>(a, b);
         REQUIRE(soln == 2);
     }
+#endif
 }

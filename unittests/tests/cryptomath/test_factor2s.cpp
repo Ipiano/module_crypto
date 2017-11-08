@@ -3,7 +3,10 @@
 
 #include "cryptomath.h"
 
+#ifdef CRYPTOMATH_GMP
 #include <gmpxx.h>
+#endif
+
 #include <utility>
 
 using namespace std;
@@ -40,10 +43,12 @@ TEST_CASE("The factor2s function")
         REQUIRE(factor2s(15708) == make_pair(2, 3927));        
     }
 
+#ifdef CRYPTOMATH_GMP    
     SECTION("GMP compatible")
     {
         REQUIRE(factor2s(mpz_class(636416)) == make_pair(mpz_class(9), mpz_class(1243)));
         REQUIRE(factor2s(mpz_class(33554432)) == make_pair(mpz_class(25), mpz_class(1)));     
         REQUIRE(factor2s(mpz_class(32343)) == make_pair(mpz_class(0), mpz_class(32343)));        
     };
+#endif
 }

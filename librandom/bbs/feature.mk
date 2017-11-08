@@ -10,7 +10,6 @@ include $(CRYPTO_ROOT)/include.mk
 hdrs_bbs = bbs.h
 HDRS_CRYPTO += $(hdrs_bbs)
 INCLUDES += -I$(pwd_bbs)/headers
-LIBS += -lgmpxx -lgmp
 
 # Define recipes for objects in this lib
 #$(objs_bbs): %.o: $(pwd_bbs)/src/%.cpp

@@ -3,7 +3,9 @@
 
 #include "cryptomath.h"
 
+#ifdef CRYPTOMATH_GMP
 #include <gmpxx.h>
+#endif
 
 using namespace std;
 using namespace cryptomath;
@@ -21,7 +23,8 @@ TEST_CASE("The inverseMod function")
         int soln = inverseMod(4, 13);
         REQUIRE(soln == 10);
     }
-
+    
+#ifdef CRYPTOMATH_GMP        
     SECTION("GMP Support: 3^-1 (mod 2)")
     {
         mpz_class a(3), b(2);
@@ -35,4 +38,5 @@ TEST_CASE("The inverseMod function")
         mpz_class soln = inverseMod<mpz_class>(a, b);
         REQUIRE(soln == mpz_class("458706057"));
     }
+#endif
 }

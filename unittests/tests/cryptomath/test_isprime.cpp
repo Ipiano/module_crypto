@@ -3,7 +3,9 @@
 
 #include "cryptomath.h"
 
+#ifdef CRYPTOMATH_GMP
 #include <gmpxx.h>
+#endif
 
 using namespace std;
 using namespace cryptomath;
@@ -37,6 +39,7 @@ TEST_CASE("The isPrime function")
         REQUIRE(isPrime((uint64_t)57725) == false);
     };
 
+#ifdef CRYPTOMATH_GMP    
     SECTION("GMP compatible")
     {
         mpz_class a(57725);
@@ -45,4 +48,5 @@ TEST_CASE("The isPrime function")
         a = mpz_class(57719);
         REQUIRE(isPrime<mpz_class>(a) == true);        
     };
+#endif
 }

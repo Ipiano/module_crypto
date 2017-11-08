@@ -349,6 +349,17 @@ bool isPrime(const Integral& n, const uint64_t& iterations = 10)
 }
 
 template<class Integral>
+Integral nextPrime(Integral start)
+{
+    if(start < 2) return 2;
+    do
+    {
+        start++;
+    }while(!isPrime(start));
+    return start;
+}
+
+template<class Integral>
 Integral sqrtfloor(const Integral& n)
 {
     return std::sqrt(n);

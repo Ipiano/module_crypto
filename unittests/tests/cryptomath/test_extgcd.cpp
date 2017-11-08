@@ -5,7 +5,10 @@
 
 #include <array>
 #include <iostream>
+
+#ifdef CRYPTOMATH_GMP
 #include <gmpxx.h>
+#endif
 
 using namespace std;
 using namespace cryptomath;
@@ -181,6 +184,7 @@ TEST_CASE("The extended gcd function")
         REQUIRE(soln[1]*a + soln[2]*b == soln[0]);
     }
 
+#ifdef CRYPTOMATH_GMP    
     SECTION("GMP Support: Extended GCD(482, 1180)")
     {
         mpz_class a = 482;
@@ -192,4 +196,5 @@ TEST_CASE("The extended gcd function")
         REQUIRE(soln[0] == ans);
         REQUIRE(soln[1]*a + soln[2]*b == soln[0]);
     }
+#endif
 }

@@ -5,12 +5,8 @@
 #include <limits>
 #include <cmath>
 #include <stdexcept>
-#include <gmpxx.h>
 
 #include "cryptomath.h"
-
-/*! Convenice macro for working with mpz_class types */
-#define gmpt(x) x.get_mpz_t()
 
 /*! Contains the Blum Blum Shub random engine */
 namespace bbs
@@ -28,24 +24,24 @@ namespace bbs
      * conjunction with any of the C++ random distributions to yield a sequence of random numbers that fit that distribution.
      *
      * Template arguments
-     *      -# UIntType(class) - Unsigned result type to return yielded bits in
+     *      -# Result(class) - Unsigned result type to return yielded bits in
      *      -# Bits(uint64_t) - Number of least significant bits of each x<SUB>n</SUB> to return (default 1)
      *      -# prime_reps(uint32_t) - Number of repetitions to use in mpz_probab_prime test function (default 25)
      */
-    template<class UIntType = uint32_t, uint64_t bits = 1, uint32_t prime_reps = 25>
+    template<class Result = uint32_t, class Integral = uint64_t, uint64_t bits = 1, uint64_t prime_reps = 25>
     class blum_blum_shub_engine
     {
-        mpz_class m; /*!< Product of p, q. Values are generated mod m */
-        mpz_class x_prev; /*!< Previous calculated value x<SUB>n</SUB> */
+        Integral m; /*!< Product of p, q. Values are generated mod m */
+        Integral x_prev; /*!< Previous calculated value x<SUB>n</SUB> */
     public:
 
-        typedef UIntType result_type; /*!< Typedef of return type to satisfy UniformRandomBitGenerator */
+        typedef Result result_type; /*!< Typedef of return type to satisfy UniformRandomBitGenerator */
 
         /*! Returns minimum possible value output by the generator
          * 
          * Needed to satisy UniformRandomBitGenerator
          *
-         * @returns The smallest value that can be contained by the templated UIntType
+         * @returns The smallest value that can be contained by the templated Result
          */
         constexpr static result_type min() { return std::numeric_limits<result_type>::min(); }
 
@@ -53,7 +49,7 @@ namespace bbs
          * 
          * Needed to satisy UniformRandomBitGenerator
          *
-         * @returns The largest value that can be contained by the templated UIntType
+         * @returns The largest value that can be contained by the templated Result
          */
         constexpr static result_type max() { return std::numeric_limits<result_type>::max(); }
 
@@ -71,12 +67,12 @@ namespace bbs
          * @throws domain_error : The generator cannot securely yield the templated number of bits given p and q (Bits must be <= log2(log2(m)))
          * @throws domain_error : x is specified and it is not relatively prime to m
          */
-        blum_blum_shub_engine(mpz_class p, mpz_class q, mpz_class x=-1)
+        blum_blum_shub_engine(Integral p, Integral q, Integral x=-1)
         {
             static_assert(sizeof(result_type)*8 >= bits, "Can't fit output bits it output type");
 
-            p = abs(p);
-            q = abs(q);
+            p = cryptomath::abs(p);
+            q = cryptomath::abs(q);
 
             //Check that p and q are (probably) prime
             if(! cryptomath::isPrime(p, prime_reps) ||
@@ -111,14 +107,13 @@ namespace bbs
                 x = p;
                 do
                 {
-                    /*! @todo Switch bbs engine next-prime to the one in cryptomath lib */
-                    mpz_nextprime(gmpt(x), gmpt(x));
+                    x = cryptomath::nextPrime(x);
                     x = x+1;
                 }while(x <= 1 && cryptomath::gcd(x, m) != 1);
             }
             else
             {
-                x = abs(x);
+                x = cryptomath::abs(x);
 
                 if(x <= 1 || cryptomath::gcd(x, m) != 1)
                 {
@@ -132,12 +127,12 @@ namespace bbs
 
         /*! Calculates the next x<SUB>n</SUB> and yields the template-defined number of bits
          *
-         * @returns UIntType with the least significant bits matching those in x<SUB>n</SUB>
+         * @returns Result with the least significant bits matching those in x<SUB>n</SUB>
          */
         result_type operator ()()
         {
-            result_type out;
-            mpz_class x = x_prev;
+            result_type out = 0;
+            Integral x = x_prev;
 
             for(int i=0; i<bits; i++)
             {

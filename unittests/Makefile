@@ -5,7 +5,6 @@ CXXFLAGS = CFLAGS
 
 TARGET = unittests_modulecrypto
 
-DEFINES += -DCRYPTOMATH_GMP
 PROJECT_ROOT = $(PWD)/..
 CRYPTO_ROOT = $(PROJECT_ROOT)
 CRYPTO_LIBS = random classiccrypto cryptomath
@@ -18,7 +17,7 @@ OBJECTS_DIR = $(BUILD_DIR)/objects
 LIBS_DIR = $(BUILD_DIR)/lib
 DEST_DIR = $(PWD)/$(BUILD_TYPE)
 
-LIBS += -lm -lpthread -lgmpxx -lgmp -L$(LIBS_DIR)
+LIBS += -lm -lpthread -L$(LIBS_DIR)
 
 # Build debug mode by default
 # Change all output directories
@@ -29,6 +28,14 @@ debug: $(TARGET)
 
 release: CFLAGS += -O2
 release: $(TARGET)
+
+debug_gmp: DEFINES += -DCRYPTOMATH_GMP
+debug_gmp: LIBS += -lgmpxx -lgmp
+debug_gmp: debug
+
+release_gmp: DEFINES += -DCRYPTOMATH_GMP
+release_gmp: LIBS += -lgmpxx -lgmp
+release_gmp: release
 
 # Include necessary headers and either sources or libraries
 include $(CRYPTO_ROOT)/include.mk

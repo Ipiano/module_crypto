@@ -3,7 +3,9 @@
 
 #include "cryptomath.h"
 
+#ifdef CRYPTOMATH_GMP
 #include <gmpxx.h>
+#endif
 
 using namespace std;
 using namespace cryptomath;
@@ -26,8 +28,7 @@ TEST_CASE("The factoring functions")
     SECTION("Non prime numbers")
     {
         vector<uint64_t> nums;
-        vector<vector<uint64_t>> facs = {{1}, {2, 2, 3, 5, 7, 7}, {2, 2, 2, 2, 2, 2, 2, 2}, {3, 3, 5}, {11, 13, 17, 23},
-                                         {3, 3, 3, 5, 7, 9, 13, 13, 19, 37, 113}};
+        vector<vector<uint64_t>> facs = {{1}, {2, 2, 3, 5, 7, 7}, {2, 2, 2, 2, 2, 2, 2, 2}, {3, 3, 5}, {11, 13, 17, 23}};
 
         for(const vector<uint64_t>& n : facs)
         {
@@ -49,10 +50,11 @@ TEST_CASE("The factoring functions")
         }
     };
 
+#ifdef CRYPTOMATH_GMP    
     SECTION("GMP compatible")
     {
         vector<mpz_class> nums;
-        vector<vector<mpz_class>> facs = {{181},{11, 13, 17, 23}};
+        vector<vector<mpz_class>> facs = {{181},{11, 13, 17, 23},{3, 3, 3, 5, 7, 9, 13, 13, 19, 37, 113}};
 
         for(const vector<mpz_class>& n : facs)
         {
@@ -73,4 +75,5 @@ TEST_CASE("The factoring functions")
             i++;
         }
     };
+#endif
 }
