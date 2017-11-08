@@ -7,7 +7,7 @@ TARGET = unittests_modulecrypto
 
 PROJECT_ROOT = $(PWD)/..
 CRYPTO_ROOT = $(PROJECT_ROOT)
-CRYPTO_LIBS = random cryptomath #classiccrypto
+CRYPTO_LIBS = random cryptomath classiccrypto
 LIBRANDOM_FEATURES = bbs
 LIBCLASSICCRYPTO_FEATURES = affine frequency
 
@@ -55,9 +55,9 @@ clean_debug: BUILD_TYPE = debug
 clean_debug: clean
 clean_release: clean
 clean:
-	@-rm $(OBJECTS_DIR)/*.o
-	@-rm $(LIBS_DIR)/*.a
-	@-rm $(DEST_DIR)/$(TARGET)
+	@-rm -f $(OBJECTS_DIR)/*.o
+	@-rm -f $(LIBS_DIR)/*.a
+	@-rm -f $(DEST_DIR)/$(TARGET)
 
 tests_cryptomath = test_extgcd.o test_gcd.o test_inversemod.o test_mod.o test_continuedfraction.o\
 				   test_factor2s.o test_isprime.o test_factor.o
@@ -65,9 +65,9 @@ tests_cryptomath = test_extgcd.o
 $(tests_cryptomath): %.o: tests/cryptomath/%.cpp
 	$(CC) -c $(CFLAGS) $(DEFINES) $(INCLUDES) $^ -o $(OBJECTS_DIR)/$@
 
-#tests_classiccrypto = test_frequencycount.o
-#$(tests_classiccrypto): %.o: tests/classiccrypto/%.cpp
-#	$(CC) -c $(CFLAGS) $(DEFINES) $(INCLUDES) $^ -o $(OBJECTS_DIR)/$@
+tests_classiccrypto = test_frequencycount.o
+$(tests_classiccrypto): %.o: tests/classiccrypto/%.cpp
+	$(CC) -c $(CFLAGS) $(DEFINES) $(INCLUDES) $^ -o $(OBJECTS_DIR)/$@
 
 tests_random = test_bbs.o
 $(tests_random): %.o: tests/random/%.cpp

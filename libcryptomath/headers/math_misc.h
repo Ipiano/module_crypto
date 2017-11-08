@@ -60,7 +60,7 @@ mpz_class inline sqrtfloor<mpz_class>(const mpz_class& n)
 }
 
 template<>
-uint8_t mod2<mpz_class>(const mpz_class& n)
+uint8_t inline mod2<mpz_class>(const mpz_class& n)
 {
     return (uint8_t)(mpz_tstbit(n.get_mpz_t(), 0));
 }

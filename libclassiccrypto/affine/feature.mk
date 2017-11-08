@@ -7,8 +7,8 @@ include $(CRYPTO_ROOT)/include.mk
 # Set up object files for this lib
 #objs_affine = affinecipher.o
 #OBJS_CLASSICCRYPTO += $(objs_affine)
-#hdrs_frequency = freq_count.h
-#HDRS_CLASSICCRYPTO += $(hdrs_frequency)
+hdrs_affine = affinecipher.h
+HDRS_CLASSICCRYPTO += $(hdrs_affine)
 INCLUDES += -I$(pwd_affine)/headers
 
 # Define recipes for objects in this lib
@@ -17,4 +17,4 @@ INCLUDES += -I$(pwd_affine)/headers
 
 # Define recipes for headers so that they can be used as requirements
 # without the full path being known elsewhere
-#$(hdrs_frequency): %.h: $(pwd_affine)/headers/%.h
+$(hdrs_affine): %.h: $(pwd_affine)/headers/%.h
