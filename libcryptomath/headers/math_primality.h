@@ -55,7 +55,7 @@ bool isPrime(const Integral& n, const uint64_t& iterations = 10)
     if(n < 3 || mod2<Integral>(n) == 0) return false;
 
     std::mt19937_64 reng;
-    std::uniform_int_distribution<uint8_t> dist(2);
+    std::uniform_int_distribution<uint64_t> dist(2);
 
     std::pair<Integral, Integral> rd = factor2s<Integral>(n-1);
     Integral& r = rd.first;

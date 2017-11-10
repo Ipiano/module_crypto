@@ -54,7 +54,7 @@ TEST_CASE("The factoring functions")
     SECTION("GMP compatible")
     {
         vector<mpz_class> nums;
-        vector<vector<mpz_class>> facs = {{181},{11, 13, 17, 23},{3, 3, 3, 5, 7, 9, 13, 13, 19, 37, 113}};
+        vector<vector<mpz_class>> facs = {{181},{11, 13, 17, 23},{3, 3, 3, 3, 3, 5, 7, 13, 13, 19, 37, 113}};
 
         for(const vector<mpz_class>& n : facs)
         {

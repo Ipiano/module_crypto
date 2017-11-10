@@ -113,6 +113,7 @@ enum class Factor_Method{Fermat, PollardRho, PollardP_1};
 template <class Integral>
 std::vector<Integral> factor(const Integral& n, const Factor_Method& m)
 {
+    DBGOUT("Factor " << n << " method " << (int)m);
     const static std::map<Factor_Method, std::function<std::pair<Integral, Integral>(const Integral&)>> algos
     {
         {Factor_Method::Fermat, factoring::fermat<Integral>},
@@ -131,12 +132,15 @@ std::vector<Integral> factor(const Integral& n, const Factor_Method& m)
     while(composites.size())
     {
         Integral i = composites.front();
+        DBGOUT("Check factor " << i);
         if(isPrime<Integral>(i))
         {
+            DBGOUT("Is prime!");
             out.push_back(i);
         }
         else if(mod2<Integral>(i) == 0)
         {
+            DBGOUT("Factoring 2's");
             auto p = factor2s<Integral>(i);
             for(int j=0; j<p.first; j++)
                 out.push_back(2);
@@ -147,6 +151,7 @@ std::vector<Integral> factor(const Integral& n, const Factor_Method& m)
             std::pair<Integral, Integral> factors = algo(i);
             composites.push(factors.first);
             composites.push(factors.second);
+            DBGOUT("Factored to " << factors.first << " " << factors.second);
         }
         composites.pop();
     }
@@ -155,18 +160,51 @@ std::vector<Integral> factor(const Integral& n, const Factor_Method& m)
     return out;
 }
 
+template<class Integral>
+Integral phi(Integral n)
+{    
+    DBGOUT("Phi(" << n << ")");
+    Integral result = n; 
+ 
+    std::vector<Integral> factors = factor(n, Factor_Method::PollardRho);
+
+    for(const Integral& q : factors)
+    {
+        DBGOUT("Factor " << q);
+        if(n % q == 0)
+        {
+            do
+            {
+                n = n / q;
+            }while( n % q == 0);
+            result = result - result / q;
+        }
+    }
+
+    if(n > 1)
+    {
+        DBGOUT("Non-0 n");
+        result = result - result / n;
+    }
+
+    return result;
+}
+
 
 /* Source https://math.stackexchange.com/questions/1416422/how-does-one-find-the-primitive-roots-of-a-non-prime-number*/
 template<class Integral>
 bool isPrimitiveRoot(Integral a, const Integral& n)
 {
-    //Get a in the range [0, n)
-    a = mod<Integral> (a, n);
+    DBGOUT(a << " is primitive root mod " << n << "?");
 
     //Trivial cases
-    if(n == 1) return true;
-    if(n == 2) return false;
-    if(n == 4) return a == 2;
+    if(n <= 1) return false;
+    
+    //Get a in the range [0, n)
+    a = mod<Integral> (a, n);
+    if(n <= 4) return a == n-1;
+
+    DBGOUT(" -> " << a << " mod " << n);
 
     //Factor n
     std::vector<Integral> factors = factor<Integral>(n, Factor_Method::PollardRho);
@@ -177,6 +215,7 @@ bool isPrimitiveRoot(Integral a, const Integral& n)
     //Check if n might be of the form 2p^k
     if(factors[0] == 2)
     {
+        DBGOUT("Maybe 2p^k");
         pk2 = true;
         //If 2 is a factor, there's guaranteed to be at least some other factor
         //because n is not 2
@@ -188,41 +227,67 @@ bool isPrimitiveRoot(Integral a, const Integral& n)
     //If n is not this form, then there are no primitive roots
     //mod n
     Integral p = factors[0];
+    DBGOUT("p = " << p << "?")
     for(const Integral& i : factors)
     {
         if(i != p) return false;
     }
+
+    //0 is never a primitive root
+    if(mod(a, p) == 0) return false;    
 
     //Check if a is a primitive root mod the prime factor p of n
 
     //Factor p-1
     Integral p1 = p-1;
     std::vector<Integral> p1factors = factor<Integral>(p1, Factor_Method::PollardRho);
-    for(auto q = p1factors.begin(); q != p1factors.end(); p1factors++)
+    DBGOUT("Factored " << p1);
+    for(auto q = p1factors.begin(); q != p1factors.end(); q++)
     {
         //Check each unique factor once
         if(q == p1factors.begin() || *q != *(q-1))
         {
+            DBGOUT("Testing " << a << " ^ ( " << p1 << " / " << *q << " )");
             //if a^((p-1)/q) mod p is 1, then it's not a primitive root
             if(powMod<Integral>(a, p1 / *q, p) == 1) return false;
         }
     }
 
+    DBGOUT(a << "is primitive root of " << p);
+
     //We know a is a primitive root of the prime factor p of n. If this is the only factor of
     //n (n is prime) we are done
     if(factors.size() == 1 && !pk2) return true;
 
-    //If n is the form 2pk, then if r odd, it's a primitive root; else r + p^k is a primitive root (but not r)
-    if(pk2)
-        return mod2<Integral>(a) == 1;
-
     //Check if a is a root of p^2, if so it is a root of all p^k
     Integral p2 = p*p;
-    for(Integral i=2; i<p2-1; i++)
+    Integral phin = phi(p2);
+
+    DBGOUT("Testing for order " << phin);    
+    for(Integral i=1; i<phin; i++)
     {
         if(powMod<Integral>(a, i, p2) == 1) return false;
     }
-    return powMod<Integral>(a, p2-1, p2) == 1;
+
+    bool rootpk = powMod<Integral>(a, phin, p2) == 1;
+    DBGOUT(a << (rootpk ? " is" : " is not") << " a primitive root of " << p << " ^ k");
+    
+    if(rootpk)
+    {
+        //If n is the form 2pk, then if r a primitive root of p^k is odd, it's a primitive root;
+        //else r + p^k is a primitive root (but not r)
+        if(pk2)
+        {
+            DBGOUT("2p^k, testing even or odd");
+            return mod2<Integral>(a) == 1;
+        }
+        else
+        {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 

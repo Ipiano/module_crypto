@@ -24,7 +24,6 @@ TEST_CASE("The extended gcd function")
         int ans = gcd(a, b);
 
         REQUIRE(soln[0] == ans);
-        cout << soln[1] << " " << soln[1] * a << " " << soln[2] << " " << soln[2] * b;
         REQUIRE(soln[1]*a + soln[2]*b == soln[0]);
     }
 
