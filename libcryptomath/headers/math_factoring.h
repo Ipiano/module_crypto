@@ -1,3 +1,4 @@
+/*! @file */ 
 #pragma once
 
 #include <utility>
@@ -93,6 +94,7 @@ namespace factoring
             {
                 b = powMod<Integral>(b, j, n);
             }
+
             for(Integral j = s-1; j < n; j++)
             {
                 b = powMod<Integral>(b, j, n);            
@@ -101,6 +103,7 @@ namespace factoring
                 DBGOUT("d = " << d);
                 if(1 < d && d < n) return std::pair<Integral, Integral>(d, n/d);
             }
+
             do
             {
                 b_initial++;

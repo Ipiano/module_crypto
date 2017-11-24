@@ -7,7 +7,7 @@ TARGET = unittests_modulecrypto
 
 PROJECT_ROOT = $(PWD)/..
 CRYPTO_ROOT = $(PROJECT_ROOT)
-CRYPTO_LIBS = random cryptomath classiccrypto
+CRYPTO_LIBS = random cryptomath classiccrypto des
 LIBRANDOM_FEATURES = bbs
 LIBCLASSICCRYPTO_FEATURES = affine frequency
 
@@ -68,11 +68,16 @@ tests_classiccrypto = test_frequencycount.o
 $(tests_classiccrypto): %.o: tests/classiccrypto/%.cpp
 	$(CC) -c $(CFLAGS) $(DEFINES) $(INCLUDES) $^ -o $(OBJECTS_DIR)/$@
 
+tests_des = test_des64.o test_des4.o
+$(tests_des): %.o: tests/des/%.cpp
+	$(CC) -c $(CFLAGS) $(DEFINES) $(INCLUDES) $^ -o $(OBJECTS_DIR)/$@
+
 tests_random = test_bbs.o
 $(tests_random): %.o: tests/random/%.cpp
 	$(CC) -c $(CFLAGS) $(DEFINES) $(INCLUDES) $^ -o $(OBJECTS_DIR)/$@
 
-objs_main = main.o $(tests_cryptomath) $(tests_classiccrypto) $(tests_random)
+#objs_main = main.o $(tests_cryptomath) $(tests_classiccrypto) $(tests_random) $(tests_des)
+objs_main = main.o  $(tests_random) $(tests_des)
 
 # Substitute objects location onto object files from internal libs
 $(TARGET): build_objects = $(patsubst %.o, $(OBJECTS_DIR)/%.o, $(objs_main) $(LIB_OBJECTS))
