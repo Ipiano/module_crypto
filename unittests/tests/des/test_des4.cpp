@@ -52,9 +52,9 @@ TEST_CASE("DES4 Internals")
 
 TEST_CASE("3 Round Crack")
 {
-    /*SECTION("Key = 000000000")
+    SECTION("Key = 0")
     {
-        uint16_t key = 0b000000000;
+        uint16_t key = 0;
 
         std::function<uint16_t(uint16_t)> encryptor = 
         [key](uint16_t block)
@@ -63,5 +63,44 @@ TEST_CASE("3 Round Crack")
         };
 
         REQUIRE(crack3(encryptor) == key);
-    }*/
+    }
+
+    SECTION("Key = 141")
+    {
+        uint16_t key = 141;
+
+        std::function<uint16_t(uint16_t)> encryptor = 
+        [key](uint16_t block)
+        {
+            return encrypt(block, key, 3);  
+        };
+
+        REQUIRE(crack3(encryptor) == key);
+    }
+
+    SECTION("Key = 265")
+    {
+        uint16_t key = 265;
+
+        std::function<uint16_t(uint16_t)> encryptor = 
+        [key](uint16_t block)
+        {
+            return encrypt(block, key, 3);  
+        };
+
+        REQUIRE(crack3(encryptor) == key);
+    }
+
+    SECTION("Key = 010011010")
+    {
+        uint16_t key = 0b010011010;
+
+        std::function<uint16_t(uint16_t)> encryptor = 
+        [key](uint16_t block)
+        {
+            return encrypt(block, key, 3);  
+        };
+
+        REQUIRE(crack3(encryptor) == key);
+    }
 }

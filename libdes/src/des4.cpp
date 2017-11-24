@@ -89,6 +89,7 @@ namespace des4
     {
         using namespace _internal;
 
+        DBG(cerr << "------------DES4-----------" << endl);
         DBG(cerr << "Encrypt " << bin(block) << " : " << bin(key) << endl);
         
         //Rotate key to right to key -1 to make extraction of subkeys easier
@@ -102,6 +103,7 @@ namespace des4
             DBG(cerr << "Round -> " << bin(block) << " : " << bin(key) << endl);
         }
         DBG(cerr << endl);   
+        DBG(cerr << "---------------------------" << endl);
         
         return block & 0xFFF;
     }
@@ -110,6 +112,7 @@ namespace des4
     {
         using namespace _internal;
 
+        DBG(cerr << "------------DES4-----------" << endl);        
         DBG(cerr << "Decrypt " << bin(block) << " : " << bin(key) << endl);
         
         //Rotate key to right to key rounds+1 to make extraction of subkeys easier
@@ -133,7 +136,8 @@ namespace des4
         DBG(cerr << "Flip block: " << bin(block) << endl);
 
         DBG(cerr << endl);
-
+        DBG(cerr << "---------------------------" << endl);
+        
         return block & 0xFFF;
     }
 
@@ -141,7 +145,7 @@ namespace des4
     {
         using namespace _internal;
 
-        DBG(cerr << hex << "Cracking DES3" << endl);
+        DBG(cerr << "Cracking DES3" << endl);
 
         //Build lookup table for xor combinations
         DBG(cerr << "Build xor lookup" << endl);
@@ -159,10 +163,11 @@ namespace des4
         vector<uint8_t> k1 {{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15}};
         vector<uint8_t> k2 = k1;
 
+        //int z = 0;
         while(k1.size() != 1 || k2.size() != 1)
         {
-            DBG(cerr << dec << k1.size() << " potential key lefts" << endl);
-            DBG(cerr << k2.size() << " potential key rights" << hex << endl);
+            DBG(cerr << k1.size() << " potential key lefts" << endl);
+            DBG(cerr << k2.size() << " potential key rights" << endl);
 
             //Should never happen
             if(k1.size() == 0 || k2.size() == 0)
@@ -171,53 +176,64 @@ namespace des4
             //Pick two random inputs with R1 = R1*
             uint16_t i = dist(reng);
             uint16_t is = (dist(reng) & 0xFC0) | (i & 0x3F);
-            DBG(cerr << "LR1 = " << i << " : LR1* = " << is << endl);
+
+            //Test cases from book
+            //--------------
+            //z++;
+            //uint16_t i =  (z == 1 ? 0b000111011011 : 0b010111011011);
+            //uint16_t is = (z == 1 ? 0b101110011011 : 0b101110011011);
+            //--------------
+            DBG(cerr << "LR1 = " << bin(i) << " : LR1* = " << bin(is) << endl);
 
             //Get their outputs
             uint16_t o = des3(i);
             uint16_t os = des3(is);
-            DBG(cerr << "LR3 = " << o << " : LR3* = " << os << endl);
+            DBG(cerr << "LR3 = " << bin(o) << " : LR3* = " << bin(os) << endl);
 
-            //Compute r4' ^ l1'
-            uint16_t rp4lp1 = (((i ^ is) & 0xFc) >> 6) ^ ((o ^ os) & 0x3F);
-            DBG(cerr << "R4\' ^ L1\' = " << rp4lp1 << endl);
+            //Compute r3' ^ l1'
+            uint16_t rp3lp1 = (((i ^ is) & 0xFC0) >> 6) ^ ((o ^ os) & 0x3F);
+            DBG(cerr << "R3\' ^ L1\' = " << bin(rp3lp1) << endl);
 
             //Find output XORs from S-Boxes
-            uint8_t s1o = (rp4lp1 & 0x70) >> 3;
-            uint8_t s2o = (rp4lp1 & 0x7);
-            DBG(cerr << "S1 -> " << s1o << " : S2 -> " << s2o << endl);
+            uint8_t s1o = (rp3lp1 & 0x38) >> 3;
+            uint8_t s2o = (rp3lp1 & 0x7);
+            DBG(cerr << "S1 -> " << bin(s1o) << " : S2 -> " << bin(s2o) << endl);
 
-            //Find l4, l4*
-            uint16_t l4 = (o & 0xFC0) >> 6;
-            uint16_t l4s = (os & 0xFC0) >> 6;
-            DBG(cerr << "L3 = " << l4 << " : L3* = " << l4s << endl);
+            //Find l3, l3*
+            uint16_t l3 = (o & 0xFC0) >> 6;
+            uint16_t l3s = (os & 0xFC0) >> 6;
+            DBG(cerr << "L3 = " << bin(l3) << " : L3* = " << bin(l3s) << endl);
 
-            //Find E(l4), E(l4*)
-            uint16_t el4 = expand(l4);
-            uint16_t el4s = expand(l4s);
-            DBG(cerr << "E(L3) = " << el4 << " : E(L3*) = " << el4s << endl);
+            //Find E(l3), E(l3*)
+            uint16_t el3 = expand(l3);
+            uint16_t el3s = expand(l3s);
+            DBG(cerr << "E(L3) = " << bin(el3) << " : E(L3*) = " << bin(el3s) << endl);
 
             //Find XORs of inputs to S-Boxes
-            uint8_t s1i = ((el4 ^ el4s) & 0xF0) >> 4;
-            uint8_t s2i = (el4 ^ el4s) & 0xF;  
-            DBG(cerr << "S1 <- " << s1i << " : S2 <- " << s2i << endl);            
+            uint8_t s1i = ((el3 ^ el3s) & 0xF0) >> 4;
+            uint8_t s2i = (el3 ^ el3s) & 0xF;  
+            DBG(cerr << "S1 <- " << bin(s1i) << " : S2 <- " << bin(s2i) << endl);            
 
             //Find candidate pairs that xor to the known input of s1
             //and the outputs from S boxes xor to the known output of s1
             set<uint8_t> s1candidates;
             for(const pair<uint8_t, uint8_t>& p : xor_lookup[s1i])
-                if(S_BOXES[0][p.first] ^ S_BOXES[0][p.second] == s1o)
+                if((S_BOXES[0][p.first] ^ S_BOXES[0][p.second]) == s1o)
                 {
-                    s1candidates.insert(p.first ^ el4);
-                    s1candidates.insert(p.second ^ el4);
+                    DBG(cerr << "Left candidate: " << bin(p.first) << ", " << bin(p.second) << " -> ");
+                    DBG(cerr << bin((uint8_t)(p.first ^ ((el3 & 0xF0) >> 4))) << ", " << bin((uint8_t)(p.second ^ ((el3 & 0xF0) >> 4))) << endl);
+                    s1candidates.insert(p.first ^ ((el3 & 0xF0) >> 4));
+                    s1candidates.insert(p.second ^ ((el3 & 0xF0) >> 4));
                 }
 
             set<uint8_t> s2candidates;
             for(const pair<uint8_t, uint8_t>& p : xor_lookup[s2i])
-                if(S_BOXES[1][p.first] ^ S_BOXES[1][p.second] == s2o)
+                if((S_BOXES[1][p.first] ^ S_BOXES[1][p.second]) == s2o)
                 {
-                    s2candidates.insert(p.first ^ el4);
-                    s2candidates.insert(p.second ^ el4);
+                    DBG(cerr << "Right candidate: " << bin(p.first) << ", " << bin(p.second) << " -> ");
+                    DBG(cerr << bin((uint8_t)(p.first ^ (el3 & 0xF))) << ", " << bin((uint8_t)(p.second ^ (el3 & 0xF))) << endl);
+                    s2candidates.insert(p.first ^ (el3 & 0xF));
+                    s2candidates.insert(p.second ^ (el3 & 0xF));
                 }
 
             vector<uint8_t> merge(16);
@@ -234,11 +250,17 @@ namespace des4
 
         uint8_t kl = *(k1.begin());
         uint8_t kr = *(k2.begin());
-        uint8_t k = (kl << 3) | (kr >> 1) | ((kr & 1) << 8);
+        uint16_t k = (kl << 3) | (kr >> 1) | ((kr & 1) << 8);
         uint16_t block = dist(reng);
 
-        if(des3(block) != encrypt(block, k))
+        DBG(cerr << "Key parts = " << bin(kl) << " : " << bin(kr) << endl);
+        DBG(cerr << "Key is maybe " << bin(k) << endl);
+
+        if(des3(block) != encrypt(block, k, 3))
+        {
+            DBG(cerr << "Nope, key is " << bin((uint16_t)(k | (1 << 7))) << endl);
             return k | (1 << 7);
+        }
         return k;
     }
 
