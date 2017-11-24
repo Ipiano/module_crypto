@@ -104,3 +104,71 @@ TEST_CASE("3 Round Crack")
         REQUIRE(crack3(encryptor) == key);
     }
 }
+
+TEST_CASE("4 Round Crack")
+{/*
+    SECTION("Key = 0")
+    {
+        uint16_t key = 0;
+
+        std::function<uint16_t(uint16_t)> encryptor = 
+        [key](uint16_t block)
+        {
+            return encrypt(block, key);  
+        };
+
+        REQUIRE(crack4(encryptor) == key);
+    }
+
+    SECTION("Key = 141")
+    {
+        uint16_t key = 141;
+
+        std::function<uint16_t(uint16_t)> encryptor = 
+        [key](uint16_t block)
+        {
+            return encrypt(block, key);  
+        };
+
+        REQUIRE(crack4(encryptor) == key);
+    }
+
+    SECTION("Key = 265")
+    {
+        uint16_t key = 265;
+
+        std::function<uint16_t(uint16_t)> encryptor = 
+        [key](uint16_t block)
+        {
+            return encrypt(block, key);  
+        };
+
+        REQUIRE(crack4(encryptor) == key);
+    }
+
+    SECTION("Key = 010011010")
+    {
+        uint16_t key = 0b010011010;
+
+        std::function<uint16_t(uint16_t)> encryptor = 
+        [key](uint16_t block)
+        {
+            return encrypt(block, key);  
+        };
+
+        REQUIRE(crack4(encryptor) == key);
+    }*/
+
+    SECTION("Key = 101110000")
+    {
+        uint16_t key = 0b101110000;
+
+        std::function<uint16_t(uint16_t)> encryptor = 
+        [key](uint16_t block)
+        {
+            return encrypt(block, key);  
+        };
+
+        REQUIRE(crack4(encryptor) == key);
+    }
+}

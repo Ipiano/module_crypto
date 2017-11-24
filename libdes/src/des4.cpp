@@ -4,6 +4,7 @@
 #include <set>
 #include <stdexcept>
 #include <algorithm>
+#include <unordered_map>
 
 #ifndef DEBUG
     #define DBG(a) 
@@ -83,6 +84,53 @@ namespace des4
             DBG(cerr << bin((uint16_t)(r << 6)) << " : " << bin((uint8_t)(f ^ l)) << endl);
             return (r << 6) | (f ^ l);
         }
+
+        void analyze3(const uint16_t& rp3lp1, const uint16_t& o, const uint16_t& os,
+                      set<uint8_t>& s1candidates, set<uint8_t>& s2candidates)
+        {
+            s1candidates.clear();
+            s2candidates.clear();
+
+            //Find output XORs from S-Boxes
+            uint8_t s1o = (rp3lp1 & 0x38) >> 3;
+            uint8_t s2o = (rp3lp1 & 0x7);
+            DBG(cerr << "S1 -> " << bin(s1o) << " : S2 -> " << bin(s2o) << endl);
+
+            //Find l3, l3*
+            uint16_t l3 = (o & 0xFC0) >> 6;
+            uint16_t l3s = (os & 0xFC0) >> 6;
+            DBG(cerr << "L3 = " << bin(l3) << " : L3* = " << bin(l3s) << endl);
+
+            //Find E(l3), E(l3*)
+            uint16_t el3 = expand(l3);
+            uint16_t el3s = expand(l3s);
+            DBG(cerr << "E(L3) = " << bin(el3) << " : E(L3*) = " << bin(el3s) << endl);
+
+            //Find XORs of inputs to S-Boxes
+            uint8_t s1i = ((el3 ^ el3s) & 0xF0) >> 4;
+            uint8_t s2i = (el3 ^ el3s) & 0xF;  
+            DBG(cerr << "S1 <- " << bin(s1i) << " : S2 <- " << bin(s2i) << endl);            
+
+            //Find candidate pairs that xor to the known input of s1
+            //and the outputs from S boxes xor to the known output of s1
+            for(const pair<uint8_t, uint8_t>& p : XOR_LOOKUP[s1i])
+                if((S_BOXES[0][p.first] ^ S_BOXES[0][p.second]) == s1o)
+                {
+                    DBG(cerr << "Left candidate: " << bin(p.first) << ", " << bin(p.second) << " -> ");
+                    DBG(cerr << bin((uint8_t)(p.first ^ ((el3 & 0xF0) >> 4))) << ", " << bin((uint8_t)(p.second ^ ((el3 & 0xF0) >> 4))) << endl);
+                    s1candidates.insert(p.first ^ ((el3 & 0xF0) >> 4));
+                    s1candidates.insert(p.second ^ ((el3 & 0xF0) >> 4));
+                }
+
+            for(const pair<uint8_t, uint8_t>& p : XOR_LOOKUP[s2i])
+                if((S_BOXES[1][p.first] ^ S_BOXES[1][p.second]) == s2o)
+                {
+                    DBG(cerr << "Right candidate: " << bin(p.first) << ", " << bin(p.second) << " -> ");
+                    DBG(cerr << bin((uint8_t)(p.first ^ (el3 & 0xF))) << ", " << bin((uint8_t)(p.second ^ (el3 & 0xF))) << endl);
+                    s2candidates.insert(p.first ^ (el3 & 0xF));
+                    s2candidates.insert(p.second ^ (el3 & 0xF));
+                }
+        }
     }
 
     uint16_t encrypt(uint16_t block, uint16_t key, const uint64_t& rounds)
@@ -147,13 +195,6 @@ namespace des4
 
         DBG(cerr << "Cracking DES3" << endl);
 
-        //Build lookup table for xor combinations
-        DBG(cerr << "Build xor lookup" << endl);
-        array<vector<pair<uint8_t, uint8_t>>, 16> xor_lookup;
-        for(uint8_t i = 0; i < 16; i++)
-            for(uint8_t j = 0; j < 16; j++)
-                xor_lookup[i^j].emplace_back(i, j);
-
         //Random generator to get test cases
         mt19937 reng;
         uniform_int_distribution<> dist(0, 0xFFF);
@@ -194,57 +235,18 @@ namespace des4
             uint16_t rp3lp1 = (((i ^ is) & 0xFC0) >> 6) ^ ((o ^ os) & 0x3F);
             DBG(cerr << "R3\' ^ L1\' = " << bin(rp3lp1) << endl);
 
-            //Find output XORs from S-Boxes
-            uint8_t s1o = (rp3lp1 & 0x38) >> 3;
-            uint8_t s2o = (rp3lp1 & 0x7);
-            DBG(cerr << "S1 -> " << bin(s1o) << " : S2 -> " << bin(s2o) << endl);
-
-            //Find l3, l3*
-            uint16_t l3 = (o & 0xFC0) >> 6;
-            uint16_t l3s = (os & 0xFC0) >> 6;
-            DBG(cerr << "L3 = " << bin(l3) << " : L3* = " << bin(l3s) << endl);
-
-            //Find E(l3), E(l3*)
-            uint16_t el3 = expand(l3);
-            uint16_t el3s = expand(l3s);
-            DBG(cerr << "E(L3) = " << bin(el3) << " : E(L3*) = " << bin(el3s) << endl);
-
-            //Find XORs of inputs to S-Boxes
-            uint8_t s1i = ((el3 ^ el3s) & 0xF0) >> 4;
-            uint8_t s2i = (el3 ^ el3s) & 0xF;  
-            DBG(cerr << "S1 <- " << bin(s1i) << " : S2 <- " << bin(s2i) << endl);            
-
-            //Find candidate pairs that xor to the known input of s1
-            //and the outputs from S boxes xor to the known output of s1
-            set<uint8_t> s1candidates;
-            for(const pair<uint8_t, uint8_t>& p : xor_lookup[s1i])
-                if((S_BOXES[0][p.first] ^ S_BOXES[0][p.second]) == s1o)
-                {
-                    DBG(cerr << "Left candidate: " << bin(p.first) << ", " << bin(p.second) << " -> ");
-                    DBG(cerr << bin((uint8_t)(p.first ^ ((el3 & 0xF0) >> 4))) << ", " << bin((uint8_t)(p.second ^ ((el3 & 0xF0) >> 4))) << endl);
-                    s1candidates.insert(p.first ^ ((el3 & 0xF0) >> 4));
-                    s1candidates.insert(p.second ^ ((el3 & 0xF0) >> 4));
-                }
-
-            set<uint8_t> s2candidates;
-            for(const pair<uint8_t, uint8_t>& p : xor_lookup[s2i])
-                if((S_BOXES[1][p.first] ^ S_BOXES[1][p.second]) == s2o)
-                {
-                    DBG(cerr << "Right candidate: " << bin(p.first) << ", " << bin(p.second) << " -> ");
-                    DBG(cerr << bin((uint8_t)(p.first ^ (el3 & 0xF))) << ", " << bin((uint8_t)(p.second ^ (el3 & 0xF))) << endl);
-                    s2candidates.insert(p.first ^ (el3 & 0xF));
-                    s2candidates.insert(p.second ^ (el3 & 0xF));
-                }
+            set<uint8_t> k1candidates, k2candidates;
+            analyze3(rp3lp1, o, os, k1candidates, k2candidates);
 
             vector<uint8_t> merge(16);
 
-            auto range = set_intersection(s1candidates.begin(), s1candidates.end(), k1.begin(), k1.end(), merge.begin());
+            auto range = set_intersection(k1candidates.begin(), k1candidates.end(), k1.begin(), k1.end(), merge.begin());
             k1 = vector<uint8_t>(merge.begin(), range);
             
             merge.clear();
             merge.resize(16);
 
-            range = set_intersection(s2candidates.begin(), s2candidates.end(), k2.begin(), k2.end(), merge.begin());
+            range = set_intersection(k2candidates.begin(), k2candidates.end(), k2.begin(), k2.end(), merge.begin());
             k2 = vector<uint8_t>(merge.begin(), range);
         }
 
@@ -264,8 +266,82 @@ namespace des4
         return k;
     }
 
-    uint16_t crack4(function<uint16_t(uint16_t)> des4)
+    uint16_t crack4(function<uint16_t(uint16_t)> des4, uint64_t iterations)
     {
+        using namespace _internal;
         
+        //Random generator to get test cases
+        mt19937 reng;
+        uniform_int_distribution<> dist(0, 0xFFF);
+
+        unordered_map<uint8_t, uint64_t> left_freqs;
+        unordered_map<uint8_t, uint64_t> right_freqs;
+        
+        for(int z = 0; z < iterations; z++)
+        {
+            //Pick random r0l0
+            uint16_t i = dist(reng);
+
+            //Find r0*l0* with specific xor
+            uint16_t is = (i ^ 0b011010001100);
+
+            //Run des4
+            uint16_t o = des4(i);
+            uint16_t os = des4(is);
+
+            //Assume l1'r1' = 001100000000
+            //And run 3 round analysis to get statistically
+            //likely portions of key
+            set<uint8_t> k1candids, k2candids;
+            analyze3(0x300, o, os, k1candids, k2candids);
+
+            for(uint8_t k : k1candids)
+                left_freqs[k] += k2candids.size();
+
+            for(uint8_t k : k2candids)
+                right_freqs[k] += k1candids.size();
+            
+        }
+
+        uint8_t kl = left_freqs.begin()->first;
+        uint64_t left_count = left_freqs.begin()->second;
+        
+        uint8_t kr = right_freqs.begin()->first;
+        uint8_t right_count = right_freqs.begin()->second;
+
+        DBG(cerr << "Left frequencies: " << endl);
+        for(auto iter = left_freqs.begin(); iter != left_freqs.end(); iter++)
+        {
+            DBG(cerr << bin(iter->first) << " : " << iter->second << endl);
+            if(iter->second > left_count)
+            {
+                left_count = iter->second;
+                kl = iter->first;
+            }
+        }
+
+        DBG(cerr << "Right frequencies: " << endl);        
+        for(auto iter = right_freqs.begin(); iter != right_freqs.end(); iter++)
+        {
+            DBG(cerr << bin(iter->first) << " : " << iter->second << endl);            
+            if(iter->second > right_count)
+            {
+                right_count = iter->second;
+                kr = iter->first;
+            }
+        }
+
+        uint16_t k = (kl << 2) | (kr >> 2) | ((kr & 3) << 7);
+        uint16_t block = dist(reng);
+        
+        DBG(cerr << "Key parts = " << bin(kl) << " : " << bin(kr) << endl);
+        DBG(cerr << "Key is maybe " << bin(k) << endl);
+
+        if(des4(block) != encrypt(block, k, 4))
+        {
+            DBG(cerr << "Nope, key is " << bin((uint16_t)(k | (1 << 6))) << endl);
+            return k | (1 << 6);
+        }
+        return k;
     }
 }
