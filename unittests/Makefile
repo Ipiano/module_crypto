@@ -9,7 +9,7 @@ PROJECT_ROOT = $(PWD)/..
 CRYPTO_ROOT = $(PROJECT_ROOT)
 CRYPTO_LIBS = random cryptomath classiccrypto des
 LIBRANDOM_FEATURES = bbs
-LIBCLASSICCRYPTO_FEATURES = affine frequency
+LIBCLASSICCRYPTO_FEATURES = affine frequency vigenere
 
 BUILD_TYPE = release
 BUILD_DIR = $(PROJECT_ROOT)/build/$(BUILD_TYPE)
@@ -59,12 +59,12 @@ clean:
 	@-rm -f $(LIBS_DIR)/*.a
 	@-rm -f $(DEST_DIR)/$(TARGET)
 
-tests_cryptomath = test_extgcd.o test_inversemod.o #test_mod.o test_continuedfraction.o\
+tests_cryptomath = test_extgcd.o test_inversemod.o test_mod.o test_continuedfraction.o\
 				   test_factor2s.o test_factor.o test_primitiveroots.o test_isprime.o test_gcd.o
 $(tests_cryptomath): %.o: tests/cryptomath/%.cpp
 	$(CC) -c $(CFLAGS) $(DEFINES) $(INCLUDES) $^ -o $(OBJECTS_DIR)/$@
 
-tests_classiccrypto = test_affine.o #test_frequencycount.o
+tests_classiccrypto = test_affine.o test_frequencycount.o test_vigenere.o
 $(tests_classiccrypto): %.o: tests/classiccrypto/%.cpp
 	$(CC) -c $(CFLAGS) $(DEFINES) $(INCLUDES) $^ -o $(OBJECTS_DIR)/$@
 
@@ -79,7 +79,7 @@ $(tests_random): %.o: tests/random/%.cpp
 $(info $(INCLUDED_LIBS))
 
 #objs_main = main.o $(tests_cryptomath) $(tests_classiccrypto) $(tests_random) $(tests_des)
-objs_main = main.o $(tests_classiccrypto) $(tests_cryptomath)
+objs_main = main.o $(tests_classiccrypto)
 
 # Substitute objects location onto object files from internal libs
 $(TARGET): build_objects = $(patsubst %.o, $(OBJECTS_DIR)/%.o, $(objs_main) $(LIB_OBJECTS))

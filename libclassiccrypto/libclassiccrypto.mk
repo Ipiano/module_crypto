@@ -1,5 +1,5 @@
 $(if $(LIBCLASSICCRYPTO_FEATURES),,\
-	$(eval LIBCLASSICCRYPTO_FEATURES = frequency affine))
+	$(eval LIBCLASSICCRYPTO_FEATURES = frequency affine vigenere))
 
 # Define path to this lib
 PWD_CLASSICCRYPTO := $(CRYPTO_ROOT)/libclassiccrypto

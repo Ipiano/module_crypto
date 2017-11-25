@@ -13,6 +13,11 @@ using namespace std;
 
 TEST_CASE("Affine cipher errors")
 {
+    SECTION("Empty alphabet")
+    {
+        REQUIRE_THROWS(affine::transformer(3, 5, ""));
+    };
+
     SECTION("Duplicate in alphabet")
     {
         REQUIRE_THROWS(affine::transformer(3, 5, "aabcedf"));

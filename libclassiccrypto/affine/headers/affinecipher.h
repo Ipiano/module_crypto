@@ -17,7 +17,7 @@ namespace affine
         std::string _alphabet;
         
     public:
-        transformer(int64_t a, int64_t b, std::string alphabet = DEFAULT_ALPHABET);
+        transformer(const int64_t& a, const int64_t& b, const std::string& alphabet = DEFAULT_ALPHABET);
         std::string encrypt(const std::string& message);
         std::string decrypt(const std::string& message);
     };

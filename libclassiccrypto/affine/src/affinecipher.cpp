@@ -12,7 +12,7 @@ using namespace std;
 
 namespace affine
 {
-    transformer::transformer(int64_t a, int64_t b, std::string alphabet) :
+    transformer::transformer(const int64_t& a, const int64_t& b, const std::string& alphabet) :
         _a(a), _b(b), _alphabet(alphabet)
     {
         int64_t n = _alphabet.size();
