@@ -23,6 +23,24 @@ TEST_CASE("The inverseMod function")
         int soln = inverseMod(4, 13);
         REQUIRE(soln == 10);
     }
+
+    SECTION("15^-1 (mod 26)")
+    {
+        int soln = inverseMod(15, 26);
+        REQUIRE(soln == 7);
+    }
+
+    SECTION("19^-1 (mod 26)")
+    {
+        int soln = inverseMod(19, 26);
+        REQUIRE(soln == 11);
+    }
+
+    SECTION("11^-1 (mod 26)")
+    {
+        int soln = inverseMod(11, 26);
+        REQUIRE(soln == 19);
+    }
     
 #ifdef CRYPTOMATH_GMP        
     SECTION("GMP Support: 3^-1 (mod 2)")

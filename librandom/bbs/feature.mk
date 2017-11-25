@@ -8,7 +8,7 @@ include $(CRYPTO_ROOT)/include.mk
 #objs_bbs = bbs.o
 #OBJS_CRYPTO += $(objs_bbs)
 hdrs_bbs = bbs.h
-HDRS_CRYPTO += $(hdrs_bbs)
+HDRS_RANDOM += $(hdrs_bbs)
 INCLUDES += -I$(pwd_bbs)/headers
 
 # Define recipes for objects in this lib

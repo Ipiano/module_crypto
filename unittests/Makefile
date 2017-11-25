@@ -59,12 +59,12 @@ clean:
 	@-rm -f $(LIBS_DIR)/*.a
 	@-rm -f $(DEST_DIR)/$(TARGET)
 
-tests_cryptomath = test_extgcd.o test_inversemod.o test_mod.o test_continuedfraction.o\
+tests_cryptomath = test_extgcd.o test_inversemod.o #test_mod.o test_continuedfraction.o\
 				   test_factor2s.o test_factor.o test_primitiveroots.o test_isprime.o test_gcd.o
 $(tests_cryptomath): %.o: tests/cryptomath/%.cpp
 	$(CC) -c $(CFLAGS) $(DEFINES) $(INCLUDES) $^ -o $(OBJECTS_DIR)/$@
 
-tests_classiccrypto = test_frequencycount.o
+tests_classiccrypto = test_affine.o #test_frequencycount.o
 $(tests_classiccrypto): %.o: tests/classiccrypto/%.cpp
 	$(CC) -c $(CFLAGS) $(DEFINES) $(INCLUDES) $^ -o $(OBJECTS_DIR)/$@
 
@@ -76,7 +76,10 @@ tests_random = test_bbs.o
 $(tests_random): %.o: tests/random/%.cpp
 	$(CC) -c $(CFLAGS) $(DEFINES) $(INCLUDES) $^ -o $(OBJECTS_DIR)/$@
 
-objs_main = main.o $(tests_cryptomath) $(tests_classiccrypto) $(tests_random) $(tests_des)
+$(info $(INCLUDED_LIBS))
+
+#objs_main = main.o $(tests_cryptomath) $(tests_classiccrypto) $(tests_random) $(tests_des)
+objs_main = main.o $(tests_classiccrypto) $(tests_cryptomath)
 
 # Substitute objects location onto object files from internal libs
 $(TARGET): build_objects = $(patsubst %.o, $(OBJECTS_DIR)/%.o, $(objs_main) $(LIB_OBJECTS))

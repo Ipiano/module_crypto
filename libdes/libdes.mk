@@ -7,7 +7,7 @@ objs_des = des64.o des4.o
 OBJS_DES += $(objs_des)
 
 hdrs_des = des64.h des4.h
-HDRS_CRYPTO += $(hdrs_des)
+HDRS_DES += $(hdrs_des)
 INCLUDES += -I$(PWD_DES)/headers
 
 # Define recipes for objects in this lib
