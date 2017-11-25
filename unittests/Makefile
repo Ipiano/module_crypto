@@ -76,8 +76,7 @@ tests_random = test_bbs.o
 $(tests_random): %.o: tests/random/%.cpp
 	$(CC) -c $(CFLAGS) $(DEFINES) $(INCLUDES) $^ -o $(OBJECTS_DIR)/$@
 
-#objs_main = main.o $(tests_cryptomath) $(tests_classiccrypto) $(tests_random) $(tests_des)
-objs_main = main.o  $(tests_random) $(tests_des)
+objs_main = main.o $(tests_cryptomath) $(tests_classiccrypto) $(tests_random) $(tests_des)
 
 # Substitute objects location onto object files from internal libs
 $(TARGET): build_objects = $(patsubst %.o, $(OBJECTS_DIR)/%.o, $(objs_main) $(LIB_OBJECTS))
