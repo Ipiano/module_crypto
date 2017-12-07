@@ -106,7 +106,7 @@ TEST_CASE("3 Round Crack")
 }
 
 TEST_CASE("4 Round Crack")
-{/*
+{
     SECTION("Key = 0")
     {
         uint16_t key = 0;
@@ -157,7 +157,7 @@ TEST_CASE("4 Round Crack")
         };
 
         REQUIRE(crack4(encryptor) == key);
-    }*/
+    }
 
     SECTION("Key = 101110000")
     {

@@ -85,15 +85,15 @@ namespace des4
             return (r << 6) | (f ^ l);
         }
 
-        void analyze3(const uint16_t& rp3lp1, const uint16_t& o, const uint16_t& os,
+        void analyze3(const uint16_t& rp3lp0, const uint16_t& o, const uint16_t& os,
                       set<uint8_t>& s1candidates, set<uint8_t>& s2candidates)
         {
             s1candidates.clear();
             s2candidates.clear();
 
             //Find output XORs from S-Boxes
-            uint8_t s1o = (rp3lp1 & 0x38) >> 3;
-            uint8_t s2o = (rp3lp1 & 0x7);
+            uint8_t s1o = (rp3lp0 & 0x38) >> 3;
+            uint8_t s2o = (rp3lp0 & 0x7);
             DBG(cerr << "S1 -> " << bin(s1o) << " : S2 -> " << bin(s2o) << endl);
 
             //Find l3, l3*
@@ -232,11 +232,11 @@ namespace des4
             DBG(cerr << "LR3 = " << bin(o) << " : LR3* = " << bin(os) << endl);
 
             //Compute r3' ^ l1'
-            uint16_t rp3lp1 = (((i ^ is) & 0xFC0) >> 6) ^ ((o ^ os) & 0x3F);
-            DBG(cerr << "R3\' ^ L1\' = " << bin(rp3lp1) << endl);
+            uint16_t rp3lp0 = (((i ^ is) & 0xFC0) >> 6) ^ ((o ^ os) & 0x3F);
+            DBG(cerr << "R3\' ^ L1\' = " << bin(rp3lp0) << endl);
 
             set<uint8_t> k1candidates, k2candidates;
-            analyze3(rp3lp1, o, os, k1candidates, k2candidates);
+            analyze3(rp3lp0, o, os, k1candidates, k2candidates);
 
             vector<uint8_t> merge(16);
 
@@ -258,13 +258,17 @@ namespace des4
         DBG(cerr << "Key parts = " << bin(kl) << " : " << bin(kr) << endl);
         DBG(cerr << "Key is maybe " << bin(k) << endl);
 
-        if(des3(block) != encrypt(block, k, 3))
-        {
-            DBG(cerr << "Nope, key is " << bin((uint16_t)(k | (1 << 7))) << endl);
-            return k | (1 << 7);
-        }
-        return k;
-    }
+        if(des3(block) == encrypt(block, k, 3))
+            return k;
+
+        DBG(cerr << "Nope, key is " << bin((uint16_t)(k | (1 << 7))) << endl);
+        k |= (1 << 7);
+        
+        if(des3(block) == encrypt(block, k, 3))
+            return k;
+        
+        throw std::logic_error("unable to crack");
+}
 
     uint16_t crack4(function<uint16_t(uint16_t)> des4, uint64_t iterations)
     {
@@ -289,17 +293,19 @@ namespace des4
             uint16_t o = des4(i);
             uint16_t os = des4(is);
 
+            uint16_t rp3lp0 = 0xC ^ ((o ^ os) & 0x3F);
+
             //Assume l1'r1' = 001100000000
             //And run 3 round analysis to get statistically
             //likely portions of key
             set<uint8_t> k1candids, k2candids;
-            analyze3(0x300, o, os, k1candids, k2candids);
+            analyze3(rp3lp0, o, os, k1candids, k2candids);
 
             for(uint8_t k : k1candids)
-                left_freqs[k] += k2candids.size();
+                left_freqs[k]++;
 
             for(uint8_t k : k2candids)
-                right_freqs[k] += k1candids.size();
+                right_freqs[k]++;
             
         }
 
@@ -337,11 +343,14 @@ namespace des4
         DBG(cerr << "Key parts = " << bin(kl) << " : " << bin(kr) << endl);
         DBG(cerr << "Key is maybe " << bin(k) << endl);
 
-        if(des4(block) != encrypt(block, k, 4))
-        {
-            DBG(cerr << "Nope, key is " << bin((uint16_t)(k | (1 << 6))) << endl);
-            return k | (1 << 6);
-        }
-        return k;
+        if(des4(block) == encrypt(block, k, 4))
+            return k;
+
+        DBG(cerr << "Nope, key is " << bin((uint16_t)(k | (1 << 6))) << endl);
+        k |= (1 << 6);
+        if(des4(block) == encrypt(block, k, 4))
+            return k;
+        
+        throw std::logic_error("unable to crack");
     }
 }
