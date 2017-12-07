@@ -1,5 +1,5 @@
 $(if $(LIBCLASSICCRYPTO_FEATURES),,\
-	$(eval LIBCLASSICCRYPTO_FEATURES = frequency affine vigenere))
+	$(eval LIBCLASSICCRYPTO_FEATURES = frequency affine vigenere adfgx))
 
 # Define path to this lib
 PWD_CLASSICCRYPTO := $(CRYPTO_ROOT)/libclassiccrypto
@@ -10,7 +10,4 @@ $(foreach feature,$(LIBCLASSICCRYPTO_FEATURES),$(eval include $(PWD_CLASSICCRYPT
 
 # Set up object files for this lib
 LIB_OBJECTS += $(OBJS_CLASSICCRYPTO)
-INCLUDED_LIBS += classiccrypto
-
-# Define recipe for this build
-classiccrypto: $(OBJS_CLASSICCRYPTO) $(HDRS_CLASSICCRYPTO)
+LIB_HEADERS += $(HDRS_CLASSICCRYPTO)

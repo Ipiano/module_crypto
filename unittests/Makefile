@@ -8,10 +8,8 @@ TARGET = unittests_modulecrypto
 PROJECT_ROOT = $(PWD)/..
 CRYPTO_ROOT = $(PROJECT_ROOT)
 CRYPTO_LIBS = random cryptomath classiccrypto des
-LIBRANDOM_FEATURES = bbs
-LIBCLASSICCRYPTO_FEATURES = affine frequency vigenere
 
-BUILD_TYPE = release
+BUILD_TYPE ?= debug
 BUILD_DIR = $(PROJECT_ROOT)/build/$(BUILD_TYPE)
 OBJECTS_DIR = $(BUILD_DIR)/objects
 LIBS_DIR = $(BUILD_DIR)/lib
@@ -19,23 +17,17 @@ DEST_DIR = $(PWD)/$(BUILD_TYPE)
 
 LIBS += -lm -lpthread -L$(LIBS_DIR)
 
-# Build debug mode by default
-# Change all output directories
-debug: CFLAGS += -g
-debug: DEFINES += -DDEBUG
-debug: BUILD_TYPE = debug
-debug: $(TARGET)
+all: $(if $(findstring debug, $(BUILD_TYPE)),\
+		$(info Debug Build) \
+			$(eval CFLAGS += -g) \
+			$(eval DEFINES += -DDEBUG), \
+		$(info Release Build) \
+			$(eval CFLAGS += -O2))
+all: $(TARGET)
 
-release: CFLAGS += -O2
-release: $(TARGET)
-
-debug_gmp: DEFINES += -DCRYPTOMATH_GMP
-debug_gmp: LIBS += -lgmpxx -lgmp
-debug_gmp: debug
-
-release_gmp: DEFINES += -DCRYPTOMATH_GMP
-release_gmp: LIBS += -lgmpxx -lgmp
-release_gmp: release
+gmp: DEFINES += -DCRYPTOMATH_GMP
+gmp: LIBS += -lgmpxx -lgmp
+gmp: all
 
 # Include necessary headers and either sources or libraries
 include $(CRYPTO_ROOT)/include.mk
@@ -51,40 +43,43 @@ mkdirs:
 	@-mkdir -p $(LIBS_DIR)
 	@-mkdir -p $(DEST_DIR)
 
-clean_debug: BUILD_TYPE = debug
-clean_debug: clean
-clean_release: clean
 clean:
-	@-rm -f $(OBJECTS_DIR)/*.o
-	@-rm -f $(LIBS_DIR)/*.a
-	@-rm -f $(DEST_DIR)/$(TARGET)
+	@-rm -f $(OBJECTS_DIR)/*.o 2>/dev/null || true
+	@-rm -f $(LIBS_DIR)/*.a 2>/dev/null || true
+	@-rm -f $(DEST_DIR)/$(TARGET) 2>/dev/null || true
 
-tests_cryptomath = test_extgcd.o test_inversemod.o test_mod.o test_continuedfraction.o\
-				   test_factor2s.o test_factor.o test_primitiveroots.o test_isprime.o test_gcd.o
-$(tests_cryptomath): %.o: tests/cryptomath/%.cpp
-	$(CC) -c $(CFLAGS) $(DEFINES) $(INCLUDES) $^ -o $(OBJECTS_DIR)/$@
+tests_cryptomath = $(patsubst %.o, $(OBJECTS_DIR)/%.o,\
+					 test_extgcd.o test_inversemod.o test_mod.o test_continuedfraction.o\
+				     test_factor2s.o test_factor.o test_primitiveroots.o test_isprime.o test_gcd.o)
+$(tests_cryptomath): $(OBJECTS_DIR)/%.o: tests/cryptomath/%.cpp $(HDRS_CRYPTOMATH)
+	$(CC) -c $(CFLAGS) $(DEFINES) $(INCLUDES) $< -o $@
 
-tests_classiccrypto = test_affine.o test_frequencycount.o test_vigenere.o
-$(tests_classiccrypto): %.o: tests/classiccrypto/%.cpp
-	$(CC) -c $(CFLAGS) $(DEFINES) $(INCLUDES) $^ -o $(OBJECTS_DIR)/$@
+tests_classiccrypto = $(patsubst %.o, $(OBJECTS_DIR)/%.o,\
+						test_affine.o test_frequencycount.o test_vigenere.o test_adfgx.o)
+$(tests_classiccrypto): $(OBJECTS_DIR)/%.o: tests/classiccrypto/%.cpp $(HDRS_CLASSICCRYPTO)
+	$(CC) -c $(CFLAGS) $(DEFINES) $(INCLUDES) $< -o $@
 
-tests_des = test_des64.o test_des4.o
-$(tests_des): %.o: tests/des/%.cpp
-	$(CC) -c $(CFLAGS) $(DEFINES) $(INCLUDES) $^ -o $(OBJECTS_DIR)/$@
+tests_des = $(patsubst %.o, $(OBJECTS_DIR)/%.o, \
+			  test_des64.o test_des4.o)
+$(tests_des): $(OBJECTS_DIR)/%.o: tests/des/%.cpp $(HDRS_DES)
+	$(CC) -c $(CFLAGS) $(DEFINES) $(INCLUDES) $< -o $@
 
-tests_random = test_bbs.o
-$(tests_random): %.o: tests/random/%.cpp
-	$(CC) -c $(CFLAGS) $(DEFINES) $(INCLUDES) $^ -o $(OBJECTS_DIR)/$@
+tests_random = $(patsubst %.o, $(OBJECTS_DIR)/%.o, \
+			     test_bbs.o)
+$(tests_random): $(OBJECTS_DIR)/%.o: tests/random/%.cpp $(HDRS_RANDOM)
+	$(CC) -c $(CFLAGS) $(DEFINES) $(INCLUDES) $< -o $@
 
 $(info $(INCLUDED_LIBS))
 
-#objs_main = main.o $(tests_cryptomath) $(tests_classiccrypto) $(tests_random) $(tests_des)
-objs_main = main.o $(tests_classiccrypto)
+tests = $(tests_cryptomath) $(tests_classiccrypto) $(tests_random) $(tests_des)
+#tests = $(tests_classiccrypto)
+objs_main = $(patsubst %.o, $(OBJECTS_DIR)/%.o, main.o)
+
+build_objects = $(objs_main) $(tests) $(LIB_OBJECTS)
 
 # Substitute objects location onto object files from internal libs
-$(TARGET): build_objects = $(patsubst %.o, $(OBJECTS_DIR)/%.o, $(objs_main) $(LIB_OBJECTS))
-$(TARGET): mkdirs $(objs_main) $(INCLUDED_LIBS)
+$(TARGET): $(build_objects) | mkdirs
 	$(CC) $(build_objects) $(LIBS) -o $(DEST_DIR)/$@
 
-main.o: main.cpp
-	$(CC) -c $(CFLAGS) $(DEFINES) $(INCLUDES) main.cpp -o $(OBJECTS_DIR)/main.o
+$(objs_main): $(OBJECTS_DIR)/%.o: %.cpp
+	$(CC) -c $(CFLAGS) $(DEFINES) $(INCLUDES) $< -o $@

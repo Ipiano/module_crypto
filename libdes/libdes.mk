@@ -2,25 +2,18 @@
 PWD_DES := $(CRYPTO_ROOT)/libdes
 $(info Including DES algorithms at $(PWD_DES))
 
-# Set up object files for this lib
-objs_des = des64.o des4.o
-OBJS_DES += $(objs_des)
+# List all requirements for library
+OBJS_DES = $(patsubst %.o, $(OBJECTS_DIR)/%.o, des64.o des4.o)
+HDRS_DES = $(patsubst %.h, $(PWD_DES)/headers/%.h, des64.h des4.h)
 
-hdrs_des = des64.h des4.h
-HDRS_DES += $(hdrs_des)
-INCLUDES += -I$(PWD_DES)/headers
+# Include headers
+INCLUDES += -I$(PWD_DES)/headers 
 
 # Define recipes for objects in this lib
-$(objs_des): %.o: $(PWD_DES)/src/%.cpp
-	$(CC) -c $(CFLAGS) $(DEFINES) $(INCLUDES) $^ -o $(OBJECTS_DIR)/$@
+# Dependent upon headers
+$(OBJS_DES): $(OBJECTS_DIR)/%.o: $(PWD_DES)/src/%.cpp $(HDRS_DES)
+	$(CC) -c $(CFLAGS) $(DEFINES) $(INCLUDES) $< -o $@
 
-# Define recipes for headers so that they can be used as requirements
-# without the full path being known elsewhere
-$(hdrs_des): %.h: $(PWD_DES)/headers/%.h
-
-# Set up object files for this lib
+# Add headers and objects to full groups
 LIB_OBJECTS += $(OBJS_DES)
-INCLUDED_LIBS += des
-
-# Define recipe for this build
-des: $(OBJS_DES) $(HDRS_DES)
+LIB_HEADERS += $(HDRS_DES)

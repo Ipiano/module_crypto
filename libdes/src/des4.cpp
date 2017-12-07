@@ -280,7 +280,7 @@ namespace des4
 
         unordered_map<uint8_t, uint64_t> left_freqs;
         unordered_map<uint8_t, uint64_t> right_freqs;
-        
+
         for(int z = 0; z < iterations; z++)
         {
             //Pick random r0l0

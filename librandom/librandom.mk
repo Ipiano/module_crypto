@@ -10,7 +10,4 @@ $(foreach feature,$(LIBRANDOM_FEATURES),$(eval include $(PWD_RANDOM)/$(feature)/
 
 # Set up object files for this lib
 LIB_OBJECTS += $(OBJS_RANDOM)
-INCLUDED_LIBS += random
-
-# Define recipe for this build
-random: $(OBJS_RANDOM) $(HDRS_RANDOM)
+LIB_HEADERS += $(HDRS_RANDOM)
