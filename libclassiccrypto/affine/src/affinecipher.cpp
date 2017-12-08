@@ -1,4 +1,6 @@
 #include "../headers/affinecipher.h"
+#include <algorithm>
+#include <cctype>
 
 #ifndef DEBUG
     #define DBG(a) 
@@ -12,8 +14,8 @@ using namespace std;
 
 namespace affine
 {
-    transformer::transformer(const int64_t& a, const int64_t& b, const std::string& alphabet) :
-        _a(a), _b(b), _alphabet(alphabet)
+    transformer::transformer(const int64_t& a, const int64_t& b, const std::string& alphabet, bool caseSensitive) :
+        _a(a), _b(b), _alphabet(alphabet), _case(caseSensitive)
     {
         int64_t n = _alphabet.size();
 
@@ -26,6 +28,9 @@ namespace affine
 
         _ainv = cryptomath::inverseMod(_a, n);
             
+        if(!_case)
+            transform(_alphabet.begin(), _alphabet.end(), _alphabet.begin(), [](unsigned char c){ return tolower(c); });
+
         //Build lookup table for alphabet
         for(int i=0; i<n; i++)
         {
@@ -45,11 +50,24 @@ namespace affine
         string out = "";
 
         //Convert all characters in alphabet
-        for(const char& c : message)
+        for(const char& c_ : message)
         {
+            char c = c_;
+            bool caps = false;
+
+            if(!_case && c_ >= 'A' && c_ <= 'Z')
+            {
+                c = tolower(c_);
+                caps = true;
+            }
+
             if(_alphabet_lookup.count(c))
             {
-                out.push_back(_alphabet[cryptomath::mod(_a * _alphabet_lookup[c] + _b, n)]);
+                char result = _alphabet[cryptomath::mod(_a * _alphabet_lookup[c] + _b, n)];
+
+                if(caps) result = toupper(result);
+                out.push_back(result);
+
                 DBG(cerr << _alphabet_lookup[c] << " * " << _a << " + " << _b << " (mod " << n << ")" << " = " << cryptomath::mod(_a * _alphabet_lookup[c] + _b, n));
                 DBG(cerr << " -> " << _alphabet[cryptomath::mod(_a * _alphabet_lookup[c] + _b, n)] << endl);
             }
@@ -65,11 +83,22 @@ namespace affine
         int64_t n = _alphabet.size();
         string out = "";
         
-        for(const char& c : cipher)
+        for(const char& c_ : cipher)
         {
+            char c = c_;
+            bool caps = false;
+
+            if(!_case && c_ >= 'A' && c_ <= 'Z')
+            {
+                c = tolower(c_);
+                caps = true;
+            }
+
             if(_alphabet_lookup.count(c))
             {
-                out.push_back(_alphabet[cryptomath::mod((_alphabet_lookup[c] - _b) * _ainv, n)]);
+                char result = _alphabet[cryptomath::mod((_alphabet_lookup[c] - _b) * _ainv, n)];
+                if(caps) result = toupper(result);
+                out.push_back(result);
                 DBG(cerr << "(" << _alphabet_lookup[c] << " - " << _b << ") * " << _ainv << " (mod " << n << ")" << " = " << cryptomath::mod((_alphabet_lookup[c] - _b) * _ainv, n));
                 DBG(cerr << " -> " << _alphabet[cryptomath::mod((_alphabet_lookup[c] - _b) * _ainv, n)] << endl);
             }
