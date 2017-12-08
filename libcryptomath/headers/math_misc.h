@@ -44,8 +44,20 @@ uint64_t log2(const Integral& n)
 {
     return std::log2(n);
 }
+
+template<class Integral>
+bool hasBits(const uint64_t& i)
+{
+    return sizeof(Integral)*8 >= i;
+}
     
 #ifdef CRYPTOMATH_GMP
+template<>
+bool inline hasBits<mpz_class>(const uint64_t& i)
+{
+    return true;
+}
+
 template<>
 uint64_t inline log2<mpz_class>(const mpz_class& n)
 {

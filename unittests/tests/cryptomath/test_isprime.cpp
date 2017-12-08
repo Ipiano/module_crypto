@@ -14,39 +14,48 @@ TEST_CASE("The isPrime function")
 {
     SECTION("Prime numbers")
     {
-        REQUIRE(isPrime(2) == true);        
-        REQUIRE(isPrime(3) == true);
-        REQUIRE(isPrime(5) == true);
-        REQUIRE(isPrime(7) == true);
-        REQUIRE(isPrime(11) == true);
-        REQUIRE(isPrime(13) == true);
-        REQUIRE(isPrime(15761) == true);
-        REQUIRE(isPrime(27179) == true);
-        REQUIRE(isPrime(38699) == true);
-        REQUIRE(isPrime((uint64_t)57719) == true);
+        for(Primality_Test m = Primality_Test::MillerRabin; m <= Primality_Test::SolovayStrassen; m = (Primality_Test)((int)m+1))
+        {
+            REQUIRE(isPrime(2, m) == true);        
+            REQUIRE(isPrime(3, m) == true);
+            REQUIRE(isPrime(5, m) == true);
+            REQUIRE(isPrime(7, m) == true);
+            REQUIRE(isPrime(11, m) == true);
+            REQUIRE(isPrime(13, m) == true);
+            REQUIRE(isPrime(15761, m) == true);
+            REQUIRE(isPrime(27179, m) == true);
+            REQUIRE(isPrime(38699, m) == true);
+            REQUIRE(isPrime((int64_t)57719, m) == true);
+        }
     };
 
     SECTION("Non prime numbers")
     {
-        REQUIRE(isPrime(0) == false);
-        REQUIRE(isPrime(1) == false);
-        REQUIRE(isPrime(4) == false);
-        REQUIRE(isPrime(8) == false);
-        REQUIRE(isPrime(21) == false);
-        REQUIRE(isPrime((uint64_t)96083) == false);
-        REQUIRE(isPrime((uint64_t)87699) == false);
-        REQUIRE(isPrime(44175) == false);
-        REQUIRE(isPrime((uint64_t)57725) == false);
+        for(Primality_Test m = Primality_Test::MillerRabin; m <= Primality_Test::SolovayStrassen; m = (Primality_Test)((int)m+1))
+        {
+            REQUIRE(isPrime(0, m) == false);
+            REQUIRE(isPrime(1, m) == false);
+            REQUIRE(isPrime(4, m) == false);
+            REQUIRE(isPrime(8, m) == false);
+            REQUIRE(isPrime(21, m) == false);
+            REQUIRE(isPrime((int64_t)96083, m) == false);
+            REQUIRE(isPrime((int64_t)87699, m) == false);
+            REQUIRE(isPrime(44175, m) == false);
+            REQUIRE(isPrime((int64_t)57725, m) == false);
+        }
     };
 
 #ifdef CRYPTOMATH_GMP    
     SECTION("GMP compatible")
     {
-        mpz_class a(57725);
-        REQUIRE(isPrime<mpz_class>(a) == false);
+        for(Primality_Test m = Primality_Test::MillerRabin; m <= Primality_Test::SolovayStrassen; m = (Primality_Test)((int)m+1))
+        {
+            mpz_class a(57725);
+            REQUIRE(isPrime<mpz_class>(a, m) == false);
 
-        a = mpz_class(57719);
-        REQUIRE(isPrime<mpz_class>(a) == true);        
+            a = mpz_class(57719);
+            REQUIRE(isPrime<mpz_class>(a, m) == true); 
+        }       
     };
 #endif
 }

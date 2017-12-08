@@ -50,7 +50,9 @@ clean:
 
 tests_cryptomath = $(patsubst %.o, $(OBJECTS_DIR)/%.o,\
 					 test_extgcd.o test_inversemod.o test_mod.o test_continuedfraction.o\
-				     test_factor2s.o test_factor.o test_primitiveroots.o test_isprime.o test_gcd.o)
+				     test_factor2s.o test_factor.o test_primitiveroots.o test_isprime.o test_gcd.o\
+					 test_sundaram.o test_randomprime.o)
+#tests_cryptomath = $(patsubst %.o, $(OBJECTS_DIR)/%.o, test_randomprime.o)
 $(tests_cryptomath): $(OBJECTS_DIR)/%.o: tests/cryptomath/%.cpp $(HDRS_CRYPTOMATH)
 	$(CC) -c $(CFLAGS) $(DEFINES) $(INCLUDES) $< -o $@
 
@@ -72,7 +74,7 @@ $(tests_random): $(OBJECTS_DIR)/%.o: tests/random/%.cpp $(HDRS_RANDOM)
 $(info $(INCLUDED_LIBS))
 
 tests = $(tests_cryptomath) $(tests_classiccrypto) $(tests_random) $(tests_des)
-#tests = $(tests_classiccrypto)
+#tests = $(tests_cryptomath)
 objs_main = $(patsubst %.o, $(OBJECTS_DIR)/%.o, main.o)
 
 build_objects = $(objs_main) $(tests) $(LIB_OBJECTS)

@@ -28,7 +28,7 @@ TEST_CASE("The factoring functions")
     SECTION("Non prime numbers")
     {
         vector<uint64_t> nums;
-        vector<vector<uint64_t>> facs = {{1}, {2, 2, 3, 5, 7, 7}, {2, 2, 2, 2, 2, 2, 2, 2}, {3, 3, 5}, {11, 13, 17, 23}};
+        vector<vector<uint64_t>> facs = {{1}, {2, 2, 3, 5, 7, 7}, {2, 2, 2, 2, 2, 2, 2, 2}, {3, 3, 5}, {11, 13, 17, 23}, {41, 271}};
 
         for(const vector<uint64_t>& n : facs)
         {

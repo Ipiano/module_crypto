@@ -19,9 +19,111 @@
 namespace cryptomath
 {
 
+template<class Integral>
+bool isMaybeSquare(const Integral& n)
+{
+    Integral digs2 = mod<Integral>(n, 100);
+    if(digs2 == 0 || digs2 == 25) return true;
+
+    Integral tens = digs2/10;
+    Integral ones = digs2 % 10;
+    if(mod2<Integral>(tens) == 0)
+    {
+        if(ones == 1 || ones == 4 || ones == 9)
+            return true;
+    }
+    else if(ones == 6) return true;
+
+    return false;
+}
+
+template<class Integral>
+std::pair<bool, Integral> intSqrt(const Integral& n)
+{
+    if(n == 0) return std::pair<bool, Integral>(true, 0);
+    if(!isMaybeSquare<Integral>(n)) return std::pair<bool, Integral>(false, 0);
+
+    Integral candidate = sqrtfloor<Integral>(n);
+    if(candidate*candidate == n) return std::pair<bool, Integral>(true, candidate);
+
+    return std::pair<bool, Integral>(false, 0);
+}
+
 /*! Contains factoring algorithms */
 namespace factoring
 {
+    template <class Integral>
+    std::pair<Integral, Integral> shanks(const Integral& n)
+    {
+        using std::swap;
+        DBGOUT("Shanks factor " << n);
+
+        //Check for perfect square
+        auto sqt = intSqrt<Integral>(n);
+        if(sqt.first)
+        {
+            DBGOUT("Perfect square: " << sqt.second)
+            return std::make_pair(sqt.second, sqt.second);
+        }
+
+        Integral k = 1;
+        while(true)
+        {
+            DBGOUT("k = " << k)
+            Integral pi_1 = sqrtfloor<Integral>(k*n), p0 = pi_1, pi=0;
+            Integral qi_1 = 1;
+            Integral qi = k*n - p0*p0;
+            Integral bi = 0;
+
+            Integral i = 0;
+            std::pair<bool, Integral> sqrtq;
+
+            //Forward iterations
+            while(mod2<Integral>(i+1) == 1 || !(sqrtq = intSqrt(qi)).first)
+            {
+                DBGOUT(i << " : " << pi << " | " << qi << " | " << bi);
+                i++;
+                
+                bi = (p0 + pi_1)/qi;
+
+                pi = bi*qi - pi_1;
+
+                qi_1 = qi_1 + bi*(pi_1 - pi);
+                swap(qi_1, qi);
+
+                pi_1 = pi;
+            }
+
+            //Reverse iterations
+            i = 0;
+            Integral b0 = (p0 - pi_1)/sqrtq.second;
+            p0 = pi = b0*sqrtq.second + pi_1;
+            qi_1 = sqrtq.second;
+            qi =  (k*n - p0*p0)/qi_1;
+            do
+            {
+                DBGOUT(i << " : " << pi << " | " << qi << " | " << bi);
+                i++;
+
+                pi_1 = pi;
+
+                bi = (p0 + pi_1)/qi;
+
+                pi = bi*qi-pi_1;
+
+                qi_1 = qi_1+bi*(pi_1-pi);
+                swap(qi_1, qi);
+            }while(pi != pi_1);
+
+            Integral f = gcd<Integral>(n, pi);
+            DBGOUT("f = " << f)
+            if(f != 1 && f != n)
+                return std::make_pair(f, n/f);
+
+            k++;
+        }
+    }
+
     template <class Integral>
     std::pair<Integral, Integral> fermat(const Integral& n)
     {
@@ -29,14 +131,15 @@ namespace factoring
         Integral a = sqrtfloor<Integral>(n);
         Integral b2 = a*a - n;
         
-        while(a*a < n || powInt<Integral>(sqrtfloor<Integral>(b2), 2) != b2)
+        while(a*a < n || !intSqrt<Integral>(b2).first)
         {
             a = a + 1;
             b2 = a*a - n;
             DBGOUT(a << ", " << b2);
         }
 
-        return std::make_pair(a + sqrtfloor<Integral>(b2), a - sqrtfloor<Integral>(b2)); 
+        Integral sqt = sqrtfloor<Integral>(b2);
+        return std::make_pair(a + sqt, a - sqt); 
     }
 
     template <class Integral>
@@ -112,16 +215,17 @@ namespace factoring
     }
 }
 
-enum class Factor_Method{Fermat, PollardRho, PollardP_1};
+enum class Factor_Method{Fermat, PollardRho, Shanks, PollardP_1};
 template <class Integral>
-std::vector<Integral> factor(const Integral& n, const Factor_Method& m)
+std::vector<Integral> factor(const Integral& n, const Factor_Method& m = Factor_Method::PollardRho)
 {
     DBGOUT("Factor " << n << " method " << (int)m);
     const static std::map<Factor_Method, std::function<std::pair<Integral, Integral>(const Integral&)>> algos
     {
         {Factor_Method::Fermat, factoring::fermat<Integral>},
         {Factor_Method::PollardRho, factoring::pollardrho<Integral>},
-        {Factor_Method::PollardP_1, factoring::pollardp1<Integral>}
+        {Factor_Method::PollardP_1, factoring::pollardp1<Integral>},
+        {Factor_Method::Shanks, factoring::shanks<Integral>}
     };
 
     if(n == 1 || n == 0) return std::vector<Integral>{n};
@@ -292,6 +396,5 @@ bool isPrimitiveRoot(Integral a, const Integral& n)
 
     return false;
 }
-
 
 }

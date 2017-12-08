@@ -75,8 +75,8 @@ namespace bbs
             q = cryptomath::abs(q);
 
             //Check that p and q are (probably) prime
-            if(! cryptomath::isPrime(p, prime_reps) ||
-               ! cryptomath::isPrime(q, prime_reps))
+            if(! cryptomath::isPrime(p, cryptomath::Primality_Test::MillerRabin, prime_reps) ||
+               ! cryptomath::isPrime(q, cryptomath::Primality_Test::MillerRabin, prime_reps))
             {
                 throw std::domain_error("p or q is not prime");
             }
@@ -107,7 +107,7 @@ namespace bbs
                 x = p;
                 do
                 {
-                    x = cryptomath::nextPrime(x);
+                    x = cryptomath::nextPrime(x, prime_reps);
                     x = x+1;
                 }while(x <= 1 && cryptomath::gcd(x, m) != 1);
             }

@@ -6,6 +6,7 @@
 #include <array>
 #include <vector>
 #include <cmath>
+#include <type_traits>
 
 #include "math_misc.h"
 
@@ -102,5 +103,68 @@ Integral inverseMod(const Integral& a, const Integral& n)
     }
     return 0;
 }
+
+template<class Integral>
+Integral legendre(const Integral& a, const Integral& p)
+{
+    return powMod<Integral>(a, (p-1)/2);
+}
+
+//http://2000clicks.com/mathhelp/NumberTh27JacobiSymbolAlgorithm.aspx
+template<class Integral>
+Integral _jacobi(Integral a, Integral n)
+{
+    using std::swap;
+
+    if(n <= 0 || mod2<Integral>(n) == 0)
+        throw std::logic_error("jacobi of a negative or even base is undefined");
+    
+    Integral j=1;
+    if(a < 0)
+    {
+        a = -a;
+        if(mod<Integral>(n, 4) == 3) 
+            j = -j;        
+    }
+
+    Integral modded;
+    while(a != 0)
+    {
+        while(mod<Integral>(a, 2) == 0)
+        {
+            //Process factors of 2: Jacobi(2,b) = -1 if b=3,5 (mod 8)
+            a = a/2;
+            modded = mod<Integral>(n, 8);
+            if(modded == 3 || modded == 5)
+                j = -j;
+        }
+        // Quadratic reciprocity: Jacobi(a,b) = -Jacobi(b,a) if a=3,b=3 (mod 4)
+        swap(a, n);
+
+        if(mod<Integral>(a, 4) == 3 && mod<Integral>(n, 4) == 3)
+            j = -j;
+
+        a = mod<Integral>(a, n);
+    }
+
+    if(n == 1) return j;
+    return 0;
+}
+
+template<class Integral>
+Integral jacobi(const Integral& a, const Integral& n)
+{
+    if(std::is_unsigned<Integral>::value) 
+        throw std::logic_error("jacobi calculation requires signed values");
+        
+    return _jacobi<Integral>(a, n);
+}
+
+#ifdef CRYPTOMATH_GMP
+template<>
+mpz_class inline jacobi<mpz_class>(const mpz_class& a, const mpz_class& n) {
+    return _jacobi<mpz_class>(a, n);
+}
+#endif
 
 }
