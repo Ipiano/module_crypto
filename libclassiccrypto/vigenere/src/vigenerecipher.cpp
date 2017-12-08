@@ -1,12 +1,15 @@
 #include "../headers/vigenerecipher.h"
 #include "cryptomath.h"
 
+#include <algorithm>
+#include <cctype>
+
 using namespace std;
 
 namespace vigenere
 {
-    transformer::transformer(const std::string& key, const string& key_alphabet, const string& alphabet) :
-         _key(key), _alphabet(alphabet), _key_alphabet(key_alphabet)
+    transformer::transformer(const std::string& key, const string& key_alphabet, const string& alphabet, bool caseSensitive) :
+         _key(key), _alphabet(alphabet), _key_alphabet(key_alphabet), _case(caseSensitive)
     {
         int64_t n = _alphabet.size();
         
@@ -18,6 +21,12 @@ namespace vigenere
 
         if(!key.size())
             throw std::logic_error("key is empty");
+
+        if(!_case)
+        {
+            transform(_alphabet.begin(), _alphabet.end(), _alphabet.begin(), [](unsigned char c){ return tolower(c); });
+            transform(_key_alphabet.begin(), _key_alphabet.end(), _key_alphabet.begin(), [](unsigned char c){ return tolower(c); });
+        }
 
         //Build lookup table for alphabet
         for(int i=0; i<n; i++)
@@ -50,16 +59,27 @@ namespace vigenere
         if(reset) _i = 0;
 
         string out = "";
-        for(const char& c : message)
+        for(const char& c_ : message)
         {
+            char c = c_;
+            bool caps = false;
+
+            if(!_case && c_ >= 'A' && c_ <= 'Z')
+            {
+                c = tolower(c_);
+                caps = true;
+            }
+
             if(_alphabet_lookup.count(c))
             {
-                out += _alphabet[cryptomath::mod(_alphabet_lookup[c] + _key_alphabet_lookup[_key[_i++]], n)];
+                char result = _alphabet[cryptomath::mod(_alphabet_lookup[c] + _key_alphabet_lookup[_key[_i++]], n)];
+                if(caps) result = toupper(result);
+                out += result;
                 _i %= _key.size();
             }
             else
             {
-                out += c;
+                out += c_;
             }
         }
 
@@ -73,16 +93,27 @@ namespace vigenere
         if(reset) _i = 0;
 
         string out = "";
-        for(const char& c : cipher)
+        for(const char& c_ : cipher)
         {
+            char c = c_;
+            bool caps = false;
+
+            if(!_case && c_ >= 'A' && c_ <= 'Z')
+            {
+                c = tolower(c_);
+                caps = true;
+            }
+
             if(_alphabet_lookup.count(c))
             {
-                out += _alphabet[cryptomath::mod(_alphabet_lookup[c] - _key_alphabet_lookup[_key[_i++]], n)];
+                char result = _alphabet[cryptomath::mod(_alphabet_lookup[c] - _key_alphabet_lookup[_key[_i++]], n)];
+                if(caps) result = toupper(result);
+                out += result;
                 _i %= _key.size();
             }
             else
             {
-                out += c;
+                out += c_;
             }
         }
 

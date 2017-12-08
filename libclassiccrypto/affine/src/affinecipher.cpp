@@ -72,7 +72,7 @@ namespace affine
                 DBG(cerr << " -> " << _alphabet[cryptomath::mod(_a * _alphabet_lookup[c] + _b, n)] << endl);
             }
             else
-                out.push_back(c);
+                out.push_back(c_);
         }
 
         return out;
@@ -103,7 +103,7 @@ namespace affine
                 DBG(cerr << " -> " << _alphabet[cryptomath::mod((_alphabet_lookup[c] - _b) * _ainv, n)] << endl);
             }
             else
-                out.push_back(c);
+                out.push_back(c_);
         }
 
         return out;

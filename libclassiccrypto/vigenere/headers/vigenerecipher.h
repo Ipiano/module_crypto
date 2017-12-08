@@ -14,12 +14,13 @@ namespace vigenere
         
         std::string _key;
         std::string _alphabet;  
-        std::string _key_alphabet;        
+        std::string _key_alphabet;  
+        bool _case;      
         
         uint64_t _i = 0;
 
     public:
-        transformer(const std::string& key, const std::string& key_alphabet = DEFAULT_ALPHABET, const std::string& alphabet = DEFAULT_ALPHABET);
+        transformer(const std::string& key, const std::string& key_alphabet = DEFAULT_ALPHABET, const std::string& alphabet = DEFAULT_ALPHABET, bool caseSensitive = true);
         std::string encrypt(const std::string& message, bool reset = false);
         std::string decrypt(const std::string& cipher, bool reset = false);
     };
