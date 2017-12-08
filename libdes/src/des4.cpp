@@ -5,6 +5,7 @@
 #include <stdexcept>
 #include <algorithm>
 #include <unordered_map>
+#include <chrono>
 
 #ifndef DEBUG
     #define DBG(a) 
@@ -196,7 +197,8 @@ namespace des4
         DBG(cerr << "Cracking DES3" << endl);
 
         //Random generator to get test cases
-        mt19937 reng;
+        auto t = std::chrono::system_clock::now();
+        mt19937 reng(chrono::duration_cast<chrono::milliseconds>(t.time_since_epoch()).count());
         uniform_int_distribution<> dist(0, 0xFFF);
 
         //Candidate sets or left and right parts of k
@@ -258,13 +260,14 @@ namespace des4
         DBG(cerr << "Key parts = " << bin(kl) << " : " << bin(kr) << endl);
         DBG(cerr << "Key is maybe " << bin(k) << endl);
 
-        if(des3(block) == encrypt(block, k, 3))
+        uint16_t match = des3(block);
+        if(match == encrypt(block, k, 3))
             return k;
 
         DBG(cerr << "Nope, key is " << bin((uint16_t)(k | (1 << 7))) << endl);
         k |= (1 << 7);
         
-        if(des3(block) == encrypt(block, k, 3))
+        if(match == encrypt(block, k, 3))
             return k;
         
         throw std::logic_error("unable to crack");
@@ -273,9 +276,10 @@ namespace des4
     uint16_t crack4(function<uint16_t(uint16_t)> des4, uint64_t iterations)
     {
         using namespace _internal;
-        
+
         //Random generator to get test cases
-        mt19937 reng;
+        auto t = std::chrono::system_clock::now();
+        mt19937 reng(chrono::duration_cast<chrono::milliseconds>(t.time_since_epoch()).count());
         uniform_int_distribution<> dist(0, 0xFFF);
 
         unordered_map<uint8_t, uint64_t> left_freqs;
@@ -343,12 +347,13 @@ namespace des4
         DBG(cerr << "Key parts = " << bin(kl) << " : " << bin(kr) << endl);
         DBG(cerr << "Key is maybe " << bin(k) << endl);
 
-        if(des4(block) == encrypt(block, k, 4))
+        uint16_t match = des4(block);
+        if(match == encrypt(block, k, 4))
             return k;
 
         DBG(cerr << "Nope, key is " << bin((uint16_t)(k | (1 << 6))) << endl);
         k |= (1 << 6);
-        if(des4(block) == encrypt(block, k, 4))
+        if(match == encrypt(block, k, 4))
             return k;
         
         throw std::logic_error("unable to crack");
