@@ -1,3 +1,6 @@
+/*!
+\file
+*/
 #include "../headers/adfgxcipher.h"
 
 #include <algorithm>
@@ -56,17 +59,31 @@ namespace adfgx
         {'h',"xx"}
     };
 
+    //! Represents a column of letters under the key
     struct column
     {
+        //! The letters in the column, from top to bottom
         string col;
+
+        //! The letter of the key the letters are under
         char key;
     };
 
+    //! < operator for the column type; allows sorting of the columns
     bool operator < (const column& l, const column& r)
     {
         return l.key < r.key;
     }
 
+    /*! Constructs an ADFGX transformer with the given key.
+    The key must 
+        - Be non-empty
+        - Contain no duplicates
+
+        \param[in] key The key to use for the cipher
+        \throws logic_error : The key is empty
+        \throws logic_error : The key has duplicate letters
+    */
     transformer::transformer(const std::string& key) : _key(key)
     {
         if(!_key.size())
@@ -77,14 +94,24 @@ namespace adfgx
                 throw std::logic_error("key must not contain duplicate letters");
     }
 
+    /*! Encrypts a string using the ADFGX cipher method and the
+    default substituion matrix. Any characters of the message which are
+    not part of the english alphabet will be removed
+
+    \param[in] message The string to encrypt
+    \returns string - The resulting ciphertext
+    */
     std::string transformer::encrypt(const std::string& message)
     {
         string cipher;
         string lowerMsg(message.size(), ' '); 
+
+        //Make all characters lowercase
         transform(message.begin(), message.end(), lowerMsg.begin(), [](unsigned char c){ return std::tolower(c);});
 
         DBG(cerr << message << " -> " << lowerMsg << endl);
 
+        //Substitute pair from [adfgx] for each character
         for(const char& c : lowerMsg)
         {
             auto encrypted = ENCRYPT_TABLE.find(c);
@@ -96,6 +123,7 @@ namespace adfgx
         
         vector<column> cols(_key.size());
 
+        //Write columns under key
         for(int i=0; i<_key.size(); i++)
         {
             cols[i].key = _key[i];
@@ -107,6 +135,7 @@ namespace adfgx
         for(const column& c : cols)
             cerr << c.key << " : " << c.col << endl;)
 
+        //Sort columns so key letters are alphabetic
         sort(cols.begin(), cols.end());
         cipher.clear();
 
@@ -114,6 +143,7 @@ namespace adfgx
             for(const column& c : cols)
                 cerr << c.key << " : " << c.col << endl;)
         
+        //Concatentate columns to form ciphertext
         for(const column& c : cols)
             cipher += c.col;
 
@@ -122,10 +152,19 @@ namespace adfgx
         return cipher;
     }
 
+    /*! Decrypts an ADFGX ciphertext using the default substitution matrix.
+    All letters decrypted will be lower-case values in the range a-z. Any characters
+    in the ciphertext which are not from [adfgx] will be removed.
+
+    \param[in] cipher The text to decrypt
+    \returns string - The decrypted message
+    */
     std::string transformer::decrypt(const std::string& cipher)
     {
         string lowerCiph;
         string message;
+
+        //Strip all invalid characters
         for(const char& c : cipher)
         {
             char c_ = tolower((unsigned char)c);
@@ -135,13 +174,16 @@ namespace adfgx
 
         DBG(cerr << cipher << " -> " << lowerCiph << endl);
 
+        //Determine column size and number of long columns
         uint32_t rows = lowerCiph.size() / _key.size();
         uint32_t extras = lowerCiph.size() % _key.size();
 
+        //Initialize columns in alphabetic key order
         vector<column> cols(_key.size());
         for(int i = 0; i < _key.size(); i++) cols[i].key = _key[i];
         sort(cols.begin(), cols.end());
 
+        //Fill columns
         int ind = 0;
         for(column& c : cols)
         {
@@ -154,6 +196,7 @@ namespace adfgx
         for(const column& c : cols)
             cerr << c.key << " : " << c.col << endl;)
 
+        //'Sort' columns back into original key order
         sort(cols.begin(), cols.end(), 
             [this](const column& l, const column& r)
             {
@@ -165,6 +208,8 @@ namespace adfgx
                 cerr << c.key << " : " << c.col << endl;)
 
         lowerCiph.clear();
+
+        //Concatenate rows into substituted text
         bool done = false;
         int r = 0;
         while(!done)
@@ -185,6 +230,8 @@ namespace adfgx
         }
 
         DBG(cerr << " -> " << lowerCiph << endl);
+
+        //Undo substitution using default matrix
         for(int i=0; i<lowerCiph.size(); i+=2)
         {
             message.push_back(DECRYPT_TABLE.at(lowerCiph[i]).at(lowerCiph[i+1]));
