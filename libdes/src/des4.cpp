@@ -154,7 +154,7 @@ namespace des4
             \param[out] s2candidates Possible right halves of \f$ k_3 \f$
         */
         void analyze3(const uint16_t& rp3lp0, const uint16_t& o, const uint16_t& os,
-                      set<uint8_t>& s1candidates, set<uint8_t>& s2candidates)
+                      std::set<uint8_t>& s1candidates, std::set<uint8_t>& s2candidates)
         {
             s1candidates.clear();
             s2candidates.clear();

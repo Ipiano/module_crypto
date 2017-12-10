@@ -37,10 +37,10 @@ TEST_CASE("The isPrime function")
             REQUIRE(isPrime(1, m) == false);
             REQUIRE(isPrime(4, m) == false);
             REQUIRE(isPrime(8, m) == false);
-            REQUIRE(isPrime(21, m) == false);
+            REQUIRE(isPrime((int64_t)21, m) == false);
             REQUIRE(isPrime((int64_t)96083, m) == false);
             REQUIRE(isPrime((int64_t)87699, m) == false);
-            REQUIRE(isPrime(44175, m) == false);
+            REQUIRE(isPrime((int64_t)44175, m) == false);
             REQUIRE(isPrime((int64_t)57725, m) == false);
         }
     };

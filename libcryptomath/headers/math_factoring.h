@@ -1,4 +1,4 @@
-/*! @file */ 
+/*! \file */ 
 #pragma once
 
 #include <utility>
@@ -19,6 +19,29 @@
 namespace cryptomath
 {
 
+/*! \brief Checks if it is possible that a number is square
+
+It can be show that any perfect square must be of one of the following forms: 00, e1, e4, 25, o6, e9 where e is any
+even digit and o is any odd digit. Using this rule, we can rule out some numbers as perfect squares quickly.
+
+Proof:
+
+Any number can be written in the form \f$ 100a + 10b + c \f$ where \f$ b, c \f$ are the last two digits of the number
+and \f$ a \f$ is the rest of the digits. If we square this, we obtain
+\f[10000a^2 + 2000ab + 200ac + 100b^2 + 20bc + c^2 \f]
+The first four terms are guaranteed to be greater than 100, so we care about \f$20bc + c^2 \f$. Notice that \f$ 20bc \f$ is guaranteed
+to contribute an even amount to the 10's place. If we write out all possible values for \f$ c^2 \f$, we can see that 
+all the of listed forms except 00 and 25 are accounted for. The only case to end with 0 is when \f$ c=0 \f$, so therefore
+\f$ 20bc = 0\f$, which means 00 is a valid form. The only way to end with 5 is when \f$ c = 5 \f$. In this case, \f$ 20bc \f$
+becomes \f$ 100b \f$ and therefore does not contribute to the last two digits; so we are left with \f$ c^2 = 25 \f$ asthe last
+two digits
+
+Template arguments
+    - class Integral - Some integer type
+
+\param[in] n The number to check for possible squareness
+\returns bool - Whether or not it's possible that n is square
+*/
 template<class Integral>
 bool isMaybeSquare(const Integral& n)
 {
@@ -37,6 +60,17 @@ bool isMaybeSquare(const Integral& n)
     return false;
 }
 
+/*! \brief Returns the square root of a square integer as an integer
+
+Utilizes the isMaybeSquare function to quickly rule out some numbers as being square.
+If the number might be square, it is checked by computing the square of the floor of its square root.
+
+Template arguments
+    - class Integral - Some integer type
+
+\param[in] n The number to square root
+\returns pair<bool, Integral> - [false, 0] if n not square, [true, sqrt(n)] if it is
+*/
 template<class Integral>
 std::pair<bool, Integral> intSqrt(const Integral& n)
 {
@@ -49,9 +83,28 @@ std::pair<bool, Integral> intSqrt(const Integral& n)
     return std::pair<bool, Integral>(false, 0);
 }
 
-/*! Contains factoring algorithms */
+/*! Contains algorithms for finding \f$ ab=n \f$ for some odd, non-prime \f$ n \f$ */
 namespace factoring
 {
+    /*! \brief Shanks' square forms factorization
+        
+    Fermat's factorization algorithm requires finding \f$ x^2 - y^2 = n \f$; however, it can be
+    faster to look for some \f$ x^2 = y^2 \f$ (mod \f$ n \f$). While finding such a pair \f$ x, y \f$ does 
+    not guarantee a factor of \f$ n \f$, it implies that \f$ n \f$ is a factor of \f$ (x-y)(x+y) \f$. Since there's
+    a good chance that the factors of \f$ n \f$ are split between \f$ x-y, x+y \f$, then \f$ gcd(n, x-y) \f$ is likely
+    to yield a non-trivial factor of \f$ n \f$.
+
+    Shank's square forms algorithm is a method for finding some \f$ x^2, y^2 \f$ which satisfy this. It starts with some
+    small multiple of \f$ n \f$ and walks forward until a square is found, and then walks backwards to find the second square.
+    At this point, the gcd of the difference and \f$ n \f$ can be checked. If it is not 1 or \f$ n \f$, a nontrivial factor
+    has been found; if it is trivial, the algorithm is repeated with some different multiple of \f$ n \f$
+
+    Template arguments
+        - Integral - Some Integer type
+
+    \param[in] n The value to factor
+    \returns pair<Integral, Integral> - Two values with a product \f$ n \f$
+    */
     template <class Integral>
     std::pair<Integral, Integral> shanks(const Integral& n)
     {
@@ -124,6 +177,21 @@ namespace factoring
         }
     }
 
+    /*! \brief Fermat's factorization algorithm
+
+    Fermat's factorization algorithm is based on the fact that every odd number can be
+    written as the difference of two squares. (\f$ n = a^2 - b^2\f$ for some \f$ a, b\f$). When those values
+    are found, we can write \f$ n = (a-b)(a+b) \f$; therefore \f$ a-b, a+b \f$ are factors of \f$ n \f$.
+
+    Fermat's algorithm starts with \f$ a = sqrt(n) \f$ and repeatedly checks if some possible \f$ b^2 = a^2 - n \f$ is
+    actually squared. If it is, then \f$ a, b \f$ have been found; if not, \f$ a \f$ is incremented.
+
+    Template arguments
+        - Integral - Some Integer type
+
+    \param[in] n The value to factor
+    \returns pair<Integral, Integral> - Two values with a product \f$ n \f$
+    */
     template <class Integral>
     std::pair<Integral, Integral> fermat(const Integral& n)
     {
@@ -142,22 +210,72 @@ namespace factoring
         return std::make_pair(a + sqt, a - sqt); 
     }
 
+    /*! \f$ a^2 + 1 \f$ mod \f$ n \f$
+    A function to be used in Pollard's rho factorization algorithm
+
+    Template arguments
+        - Integral - Some Integer type
+
+    \param[in] a
+    \param[in] n
+    \returns \f$ a^2 + 1 \f$ mod \f$ n \f$
+    */
     template <class Integral>
-    Integral pRho1(const Integral& a)
+    Integral pRho1(const Integral& a, const Integral& n)
     {
-        return a*a + 1;
+        return mod<Integral>(a*a + 1, n);
     }
 
+    /*! \f$ a^2 - 1 \f$ mod \f$ n \f$
+    A function to be used in Pollard's rho factorization algorithm
+
+    Template arguments
+        - Integral - Some Integer type
+
+    \param[in] a
+    \param[in] n 
+    \returns \f$ a^2 - 1 \f$ mod \f$ n \f$
+    */
     template <class Integral>
-    Integral pRho2(const Integral& a)
+    Integral pRho2(const Integral& a, const Integral& n)
     {
-        return a*a - 1;
+        Integral x = a*a;
+
+        //Prevent integer underflow in unsigned types
+        if(x == 0) x = n;
+        return mod<Integral>(x - 1, n);
     }
 
+    /*! Pollard's Rho algorithm for factoring
+
+    Pollard's Rho algorithm makes use of the cyclical nature of polynomials mod some \f$ n \f$. Given some
+    function \f$ g(x) \f$, it can be used to generate a sequence of values \f$ x_0 = x, x_1 = g(x), x_2 = g(g(x))... \f$.
+    
+    This sequence can be taken mod \f$ p \f$ for some prime to generate a new sequence. Since the original sequence is mod \f$ n \f$
+    and the second is mod \f$ p \f$, we know they will eventually start to repeat. We can even say that the second sequence, \f$ x_k \f$ mod \f$ p \f$
+    is likely to repeat much sooner because of the birthday paradox.
+
+    By stepping both sequences together, and checking the gcd of \f$ k_i, k_j \f$ we can find a factor of \f$ n \f$. Specifically,
+    when the gcd is not 1, we know one of the sequences is repeating because \f$ k_i = k_j \f$ mod \f$ p \f$; therefore
+    the difference between them is a multiple of \f$ p \f$ and the gcd is one of the factors of \f$ n \f$.
+    
+    Pollards Rho algorithm generates the two sequences as 
+        - \f$ k_{i+1} = g(k_i) \f$
+        - \f$ k_{j+1} = g(g(k_j)) \f$
+
+    If we reach a cycle and the gcd of the two numbers is \f$ n \f$, then a different function is used, or a different initial
+    value is tried
+
+    Template arguments
+        - Integral - Some Integer type
+
+    \param[in] n The value to factor
+    \returns pair<Integral, Integral> - Two values with a product \f$ n \f$
+    */
     template <class Integral>
     std::pair<Integral, Integral> pollardrho(const Integral& n)
     {
-        std::vector<std::function<Integral(const Integral&)>> PRhoFuncs {
+        std::vector<std::function<Integral(const Integral&, const Integral&)>> PRhoFuncs {
             pRho1<Integral>,
             pRho2<Integral>};
 
@@ -167,23 +285,42 @@ namespace factoring
             DBGOUT("a -> " << a_);
             for(auto g : PRhoFuncs)
             {
-                Integral b = 2;
+                Integral b = a_;
                 Integral d = 1;
                 Integral a = a_;
                 while(d == 1)
                 {
                     DBGOUT("a " << a);
-                    DBGOUT("g(a) " << g(a));                    
-                    a = g(a);
-                    b = g(g(b));
+                    DBGOUT("g(a) " << g(a, n));                    
+                    a = g(a, n);
+                    b = g(g(b, n), n);
                     d = gcd<Integral>(a-b, n);
                     DBGOUT(a << " " << b << " " << d);
                 }
-                if(d != n) return std::pair<Integral, Integral>(d, n/d);
+                if(d != 0 && d != n) return std::pair<Integral, Integral>(d, n/d);
             }
         }
     }
 
+    /*! \brief Pollard's p-1 factoring algorithm 
+
+    Pollard's p-1 algorithm leverages Fermat's little theorem and the idea that
+    \f$ a^{K(p-1)} = 1 \f$ mod \f$ p \f$ for some prime and all positive \f$ k \f$.
+
+    Because of this, we know that if some \f$ x \f$ is congruent to 1 mod a factor of some \f$ n \f$
+    then the gcd of \f$ x-1 \f$ and \f$ n \f$ will be divisible by that factor.
+
+    So, we make \f$ K(p-1) \f$ very large by using prime powers, we can use this test to find factors of \f$ n \f$. We pick some
+    \f$ x \f$ and repeatedly do \f$ x = x^\omega \f$ where \f$ \omega \f$ is some prime power. (This ensures that we have \f$ K(p-1) \f$ with lots
+    of prime factors). When the gcd of \f$ x-1 \f$ and \f$ n \f$ is not 1 or \f$ n \f$ we have found a factor of \f$ n \f$.
+
+    Template arguments
+        - Integral - Some Integer type
+
+    \param[in] n The value to factor
+    \returns pair<Integral, Integral> - Two values with a product \f$ n \f$
+    \throws logic_error : powmod would overflow the Integral type
+    */
     template <class Integral>
     std::pair<Integral, Integral> pollardp1(const Integral& n)
     {
@@ -192,12 +329,16 @@ namespace factoring
         Integral b_initial = 2;
         while(true)
         {
+            //Start with b
             Integral b = b_initial;
+
+            //Get powers of b mod n up to some point
             for(Integral j = 2; j < s-1; j++)
             {
                 b = powMod<Integral>(b, j, n);
             }
 
+            //Check successive powers for a factor
             for(Integral j = s-1; j < n; j++)
             {
                 b = powMod<Integral>(b, j, n);            
@@ -207,6 +348,7 @@ namespace factoring
                 if(1 < d && d < n) return std::pair<Integral, Integral>(d, n/d);
             }
 
+            //If we get to the end, try a larger b to start
             do
             {
                 b_initial++;
@@ -215,7 +357,24 @@ namespace factoring
     }
 }
 
+//! Enum containing all factoring methods available
 enum class Factor_Method{Fermat, PollardRho, Shanks, PollardP_1};
+
+/*! \brief General factoring algorithm
+
+This function will use one of the specific factoring functions in the factoring namespace
+to find all prime factors of a number. It factors out all powers of 2, and checks for primality; 
+while factors are not prime, they are factored using the specified algorithm.
+
+Template arguments
+    - Integral - Some Integer type
+
+\param[in] n The value to factor
+\param[in] m The method of factorization to use (Default Pollard's Rho algorithm)
+\returns vector<Integral, Integral> - All prime factors of \f$ n \f$ sorted from smallest to largest. 
+    If \f$ n \f$ is prime, it contains only \f$ n \f$. 
+    Factors which are used multiple times are included multiple times
+*/
 template <class Integral>
 std::vector<Integral> factor(const Integral& n, const Factor_Method& m = Factor_Method::PollardRho)
 {
@@ -228,23 +387,32 @@ std::vector<Integral> factor(const Integral& n, const Factor_Method& m = Factor_
         {Factor_Method::Shanks, factoring::shanks<Integral>}
     };
 
+    //Check if the number is 1 or 0
     if(n == 1 || n == 0) return std::vector<Integral>{n};
 
     auto algo = algos.at(m);
+
+    //Queue up n
     std::queue<Integral> composites;
     composites.push(n);
 
     std::vector<Integral> out;
 
+    //While there are possibly composite factors
     while(composites.size())
     {
         Integral i = composites.front();
         DBGOUT("Check factor " << i);
+
+        //Check the factor for primality
         if(isPrime<Integral>(i))
         {
+            //If so, add to output
             DBGOUT("Is prime!");
             out.push_back(i);
         }
+        //Factor out all twos and add them
+        //to factorization
         else if(mod2<Integral>(i) == 0)
         {
             DBGOUT("Factoring 2's");
@@ -253,6 +421,7 @@ std::vector<Integral> factor(const Integral& n, const Factor_Method& m = Factor_
                 out.push_back(2);
             composites.push(p.second);
         }
+        //Factor into two parts and add them to the list
         else if(i > 1)
         {
             std::pair<Integral, Integral> factors = algo(i);
@@ -267,6 +436,16 @@ std::vector<Integral> factor(const Integral& n, const Factor_Method& m = Factor_
     return out;
 }
 
+/*! Calculates \f$ \phi(n) \f$
+
+This function calculates Euler's totient function for any value using
+only integer math.
+
+Template arguments
+    - Integral - Some integer type
+\param[in] n The number to find the totient of
+\returns Integral - \f$ \phi(n) \f$
+*/
 template<class Integral>
 Integral phi(Integral n)
 {    
@@ -297,8 +476,33 @@ Integral phi(Integral n)
     return result;
 }
 
+/*! \brief Checks if some value is a primitive root
 
-/* Source https://math.stackexchange.com/questions/1416422/how-does-one-find-the-primitive-roots-of-a-non-prime-number*/
+A primitive root \f$ x \f$ mod \f$ n \f$ is any value for which all values coprime to \f$ n \f$ can be found
+as some \f$ x^k \f$ mod \f$ n \f$ for some \f$ k \f$. If \f$ n \f$ is prime, then all primitive roots of it are
+generators of the set \f$ Z_n \f$. For any primitive root, its order (number of successive powers before repeat)
+is \f$ \phi(n) \f$
+
+We can check if some \f$ a \f$ is a primitive root mod \f$ n \f$ with a couple of rules
+    - For some prime \f$ p \f$, a primitive root will satisfy \f$ a^{\phi(p)/q_i} \neq 1 \f$ mod \f$ p \f$ for all factors \f$ q_i \f$ of \f$ \phi(p) \f$
+    - Other than 1, 2, and 4, numbers with primitive roots are of the form \f$ p^k \f$ or \f$ 2p^k \f$ for some odd prime \f$ p \f$
+    - The order of a primitive root mod \f$ n \f$ is \f$ \phi(n) \f$
+    - If \f$ a \f$ is a primitive root of \f$ p \f$, then either \f$ a \f$ or \f$ a + p \f$ is a primitive root of all \f$ p^k \f$
+    - If some odd \f$ a \f$ is a primitive root of \f$ p \f$, then \f$ a \f$ is a primitive root of all \f$ 2p^k \f$
+
+So, to check if \f$ a \f$ is a primitive root mod \f$ n \f$, we first check that \f$ n \f$ is of the form of a number with primitive roots. Then
+we factor \f$ n \f$ to get it's prime factor. We check if \f$ a \f$ is a primitive root of that prime factor. If that prime factor is the only factor
+then \f$ n \f$ is prime and we are done. Otherwise, we check if the order of \f$ a \f$ is \f$ \phi(n) \f$ mod \f$ p^2 \f$. If 2 is not a factor
+of \f$ n \f$, then we are done; otherwise, we check if \f$ a \f$ is odd.
+
+Template arguments
+    - Integral - Some integer value
+
+\param[in] a The number to test if it's a primitive root
+\param[in] n The number to test \f$ a \f$ modded by
+\returns bool - Whether or not \f$ a \f$ is a primitive root mod \f$ n \f$
+\throws logic_error : powmod would overflow the Integral type
+*/
 template<class Integral>
 bool isPrimitiveRoot(Integral a, const Integral& n)
 {

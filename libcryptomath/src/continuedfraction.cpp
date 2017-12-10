@@ -99,7 +99,7 @@ vector<uint64_t> ftocf(uint64_t p, uint64_t q)
 
 /*! Finds the continued fraction of sqrt(n) as an integer i and repeating continued fraction coefficients. The first value in the returned continued
  * fraction is the integer portion, and the remaning values will repeat infinitely. The end of the period is the first
- * value in the repeating fraction a such that a == 2*i
+ * value in the repeating fraction a such that \f$ a == 2*i \f$
  *  
  * @param[in] n The value to convert the square root of
  *
@@ -133,11 +133,11 @@ std::vector<uint64_t> sqrttocf(uint64_t n)
 }
 
 /*! Generates all p/q approximations of the continued fraction using the following formulas
- *      - p(k) = a(k) * p(k-1) + p(k-2)
- *      - q(k) = a(k) * q(k-1) + q(k-2)
+ *      - \f$ p(k) = a(k) * p(k-1) + p(k-2) \f$
+ *      - \f$ q(k) = a(k) * q(k-1) + q(k-2) \f$
  *  Where
- *      - p(-2) = 0, p(-1) = 1
- *      - q(-2) = 1, q(-1) = 0
+ *      - \f$ p(-2) = 0, p(-1) = 1 \f$
+ *      - \f$ q(-2) = 1, q(-1) = 0 \f$
  *  
  * By default, all values will be used once. If repetitions is set to n (n != 0), then the first
  * n times the loop hits the last value in the input, the loop will jump back to the second value.
@@ -184,7 +184,7 @@ vector<pair<uint64_t, uint64_t>> cftof(const std::vector<uint64_t>& cf, uint64_t
     return result;
 }
 
-/*! Generates a double value from a continued fraction form by using the formula x = i + 1/x for each
+/*! Generates a double value from a continued fraction form by using the formula \f$ x = i + 1/x \f$ for each
  * value in the continued fraction in reverse order.
  *
  * By default, all values will be used once. If repetitions is set to n (n != 0), then the first
