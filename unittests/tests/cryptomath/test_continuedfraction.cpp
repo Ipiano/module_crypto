@@ -11,6 +11,15 @@
 using namespace std;
 using namespace cryptomath::continuedfractions;
 
+/*!
+    \test Tests converting doubles to continued fractions
+        - 0
+        - 1
+        - 23
+        - 23.5
+        - 23.3333
+        - pi
+*/
 TEST_CASE("Double to continued fraction")
 {
     vector<uint64_t> result;
@@ -58,6 +67,15 @@ TEST_CASE("Double to continued fraction")
     };
 };
 
+/*!
+    \test Tests converting raionals to continued fractions
+        - 10/8
+        - 10/28
+        - 3/7
+        - 13/9
+        - 1/1
+        - 0/1
+*/
 TEST_CASE("Fraction to continued fraction")
 {
     vector<uint64_t> result;
@@ -110,6 +128,14 @@ TEST_CASE("Fraction to continued fraction")
     };
 };
 
+/*!
+    \test Tests converting simple square roots to continued fractions with repeating portions
+        - sqrt(7)
+        - sqrt(3)
+        - sqrt(0)
+        - sqrt(1)
+        - sqrt(4)
+*/
 TEST_CASE("Continued fractions of simple square roots")
 {
     vector<uint64_t> result;
@@ -150,6 +176,21 @@ TEST_CASE("Continued fractions of simple square roots")
     };
 }
 
+/*! 
+    \test Tests converting continued fractions to rational approximations
+        - 0
+        - 1
+        - 23
+        - 23; 2
+        - 23; 3, 3333, 7778288
+        - 2; 1, 1, 1, 4
+        - 1; 1, 2
+        - 3; 7, 15, 1
+        - 1; 4
+        - 0; 2, 1, 4
+        - 0; 2, 3
+        - 1; 2, 4
+*/
 TEST_CASE("Continued fraction to approximation")
 {
     vector<pair<uint64_t, uint64_t>> result;
@@ -237,22 +278,19 @@ TEST_CASE("Continued fraction to approximation")
 
         REQUIRE(result == (vector<pair<uint64_t, uint64_t>>{{1, 1}, {3, 2}, {13, 9}}));
     };
-
-    SECTION("1/1 to continued fraction approximation")
-    {
-        result = cftof(vector<uint64_t>{1});
-
-        REQUIRE(result == (vector<pair<uint64_t, uint64_t>>{{1, 1}}));
-    };
-
-    SECTION("0/1 to continued fraction approximation")
-    {
-        result = cftof(vector<uint64_t>{0});
-
-        REQUIRE(result == (vector<pair<uint64_t, uint64_t>>{{0, 1}}));
-    };
 };
 
+/*! 
+    \test Tests converting continued fractions to real approximation
+        - 0
+        - 1
+        - 23
+        - 23; 2
+        - 23; 3, 3333, 7778288
+        - 2; 1, 1, 1, 4
+        - 1; 1, 2
+        - 3; 7, 15, 1, 292, 1
+*/
 TEST_CASE("Continued fraction to double")
 {
     double result;

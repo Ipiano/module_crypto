@@ -11,7 +11,19 @@ using namespace std;
 using namespace des64;
 using namespace _internal;
 
-//Cases from http://page.math.tu-berlin.de/~kant/teaching/hess/krypto-ws2006/des.htm
+/*!
+    \test Tests the internals for the full DES.
+    Cases from http://page.math.tu-berlin.de/~kant/teaching/hess/krypto-ws2006/des.htm
+
+    Specific tests
+        - Parity Check
+        - Sub-key generation
+        - Permute
+        - Expand
+        - Internal Permute
+        - Inverse Permute
+        - F function
+*/
 TEST_CASE("DES64 Internals")
 {
     SECTION("Parity Check")
@@ -83,6 +95,9 @@ TEST_CASE("DES64 Internals")
     }
 };
 
+/*!
+    \test Tests a specific encryption with the full DES
+*/
 TEST_CASE("DES64 Encrypt")
 { 
     SECTION("Given test case")
@@ -91,6 +106,9 @@ TEST_CASE("DES64 Encrypt")
     }
 }
 
+/*!
+    \test Tests a specific decryption with the full DES
+*/
 TEST_CASE("DES64 Decrypt")
 {
     SECTION("Given test case")

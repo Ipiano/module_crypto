@@ -11,6 +11,10 @@
 using namespace std;
 using namespace cryptomath;
 
+/*! 
+    \test Tests taht the random prime generator works and can be used with GMP
+        - 10, 12, 14, 20, and 100 bits
+*/
 TEST_CASE("The randomPrime function")
 {
     typedef bbs::blum_blum_shub_engine<uint8_t, uint64_t> generator;

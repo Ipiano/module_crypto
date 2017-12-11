@@ -12,6 +12,14 @@
 using namespace std;
 using namespace frequency;
 
+/*!
+    \test Confirms that the frequency counter can be used
+    to output to an array of integers when counting values
+    from data arrays, strings, and streams containing
+        - no data
+        - 1 data
+        - > 1 data
+*/
 TEST_CASE("Frequency count using array output")
 {
     SECTION("Input non-string")
@@ -157,6 +165,14 @@ TEST_CASE("Frequency count using array output")
     }
 };
 
+/*!
+    \test Confirms that the frequency counter can be used
+    to output to a vector of a custom type when counting values
+    from data arrays, strings, and streams containing
+        - no data
+        - 1 data
+        - > 1 data
+*/
 TEST_CASE("Frequency count using vector of custom type output")
 {
     struct data

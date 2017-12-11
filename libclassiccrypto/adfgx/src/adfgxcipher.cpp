@@ -12,10 +12,12 @@
 using namespace std;
 
 #ifndef DEBUG
+    /*! Removes verbose debug outputs from compiled result */
     #define DBG(a) 
 #else
     #include <iostream>
     #include <iomanip>
+    /*! Enables verbose debug outputs from compiled result */
     #define DBG(a) a
 #endif
 

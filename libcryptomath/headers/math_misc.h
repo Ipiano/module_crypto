@@ -5,6 +5,7 @@
 #include <array>
 
 #ifndef DBGOUT
+/*! Removes verbose debug outputs from compiled result */
 #define DBGOUT(a) 
 #endif
 
@@ -20,7 +21,7 @@ that doesn't implement bitwise operators, this can be specialized to provide an 
 odd test.
 
 Template arguments
-    - Integral - Some integer type
+    - class Integral - Some integer type
 
 \param[in] n Value to test for odd-ness
 \returns uint8_t - n % 2
@@ -34,7 +35,7 @@ uint8_t mod2(const Integral& n)
 /*! \brief Floor of square root
 
 Template arguments
-    - Integral - Some integer type
+    - class Integral - Some integer type
 
 \param[in] n Value to square root
 \returns Integral - Square root of n rounded down
@@ -48,7 +49,7 @@ Integral sqrtfloor(const Integral& n)
 /*! \brief Integer pow function
 
 Template arguments
-    - Integral - Some integer type
+    - class Integral - Some integer type
 
 \param[in] a Base
 \param[in] b Power to take a to
@@ -69,7 +70,7 @@ Integral powInt(const Integral& a, const Integral& b)
 /*! \brief Log base 2
 
 Template arguments
-    - Integral - Some integer type
+    - class Integral - Some integer type
 
 \param[in] n Value to square root
 \returns Integral -Square root of n rounded down
@@ -86,7 +87,7 @@ Can be specialized for arbitrary precision types to always
 return true
 
 Template arguments
-    - Integral - Some integer type
+    - class Integral - Some integer type
 
 \param[in] i Number of bits
 \returns bool - Whether or not Integral type has at least i bits
@@ -103,7 +104,7 @@ Templated absolute value function which can be specialized
 for non standard integer types
 
 Template arguments
-    - Integral - Some integer type
+    - class Integral - Some integer type
 
 \param[in] a Value to absolute
 \returns Integral - |a|
@@ -149,5 +150,71 @@ unsigned values
 */
 template<>
 uint8_t inline abs<uint8_t>(const uint8_t& a){ return a; }
+
+
+/*! \brief Checks if it is possible that a number is square
+
+It can be show that any perfect square must be of one of the following forms: 00, e1, e4, 25, o6, e9 where e is any
+even digit and o is any odd digit. Using this rule, we can rule out some numbers as perfect squares quickly.
+
+Proof:
+
+Any number can be written in the form \f$ 100a + 10b + c \f$ where \f$ b, c \f$ are the last two digits of the number
+and \f$ a \f$ is the rest of the digits. If we square this, we obtain
+\f[10000a^2 + 2000ab + 200ac + 100b^2 + 20bc + c^2 \f]
+The first four terms are guaranteed to be greater than 100, so we care about \f$20bc + c^2 \f$. Notice that \f$ 20bc \f$ is guaranteed
+to contribute an even amount to the 10's place. If we write out all possible values for \f$ c^2 \f$, we can see that 
+all the of listed forms except 00 and 25 are accounted for. The only case to end with 0 is when \f$ c=0 \f$, so therefore
+\f$ 20bc = 0\f$, which means 00 is a valid form. The only way to end with 5 is when \f$ c = 5 \f$. In this case, \f$ 20bc \f$
+becomes \f$ 100b \f$ and therefore does not contribute to the last two digits; so we are left with \f$ c^2 = 25 \f$ asthe last
+two digits
+
+Template arguments
+    - class Integral - Some integer type
+
+\param[in] n The number to check for possible squareness
+\returns bool - Whether or not it's possible that n is square
+*/
+template<class Integral>
+bool isMaybeSquare(const Integral& n)
+{
+    Integral digs2 = n % 100;
+    if(digs2 == 0 || digs2 == 25) return true;
+
+    Integral tens = digs2/10;
+    Integral ones = digs2 % 10;
+    if(mod2<Integral>(tens) == 0)
+    {
+        if(ones == 1 || ones == 4 || ones == 9)
+            return true;
+    }
+    else if(ones == 6) return true;
+
+    return false;
+}
+
+/*! \brief Returns the square root of a square integer as an integer
+
+Utilizes the isMaybeSquare function to quickly rule out some numbers as being square.
+If the number might be square, it is checked by computing the square of the floor of its square root.
+
+Template arguments
+    - class Integral - Some integer type
+
+\param[in] n The number to square root
+\returns pair<bool, Integral> - [false, 0] if n not square, [true, sqrt(n)] if it is
+*/
+template<class Integral>
+std::pair<bool, Integral> intSqrt(const Integral& n)
+{
+    if(n == 0) return std::pair<bool, Integral>(true, 0);
+    if(!isMaybeSquare<Integral>(n)) return std::pair<bool, Integral>(false, 0);
+
+    Integral candidate = sqrtfloor<Integral>(n);
+    if(candidate*candidate == n) return std::pair<bool, Integral>(true, candidate);
+
+    return std::pair<bool, Integral>(false, 0);
+}
+
 
 }

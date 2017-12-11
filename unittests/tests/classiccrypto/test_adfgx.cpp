@@ -11,6 +11,10 @@
 
 using namespace std;
 
+/*!
+    \test Confirms that the adfgx cipher transformer will
+    correctly throw exceptions if the key is invalid
+*/
 TEST_CASE("ADFGX cipher errors")
 {
     SECTION("Empty key")
@@ -25,6 +29,11 @@ TEST_CASE("ADFGX cipher errors")
     };
 };
 
+/*!
+    \test Confirms that the adfgx cipher transformer will
+    correctly encrypt the example in the reference book (Key - RHINE; text Kaiser Wilhelm) and
+    that whitespace and extra characters in the text are ignored
+*/
 TEST_CASE("ADFGX cipher encrypt")
 {
     SECTION("Key = RHINE")
@@ -43,6 +52,11 @@ TEST_CASE("ADFGX cipher encrypt")
     };
 };
 
+/*!
+    \test Confirms that the adfgx cipher transformer will
+    correctly decrypt the example in the reference book (Key - RHINE; text Kaiser Wilhelm) and
+    that whitespace and extra characters in the text are ignored
+*/
 TEST_CASE("ADFGX cipher decrypt")
 {
     SECTION("Key = RHINE")

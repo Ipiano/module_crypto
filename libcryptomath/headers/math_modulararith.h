@@ -11,6 +11,7 @@
 #include "math_misc.h"
 
 #ifndef DBGOUT
+/*! Removes verbose debug outputs from compiled result */
 #define DBGOUT(a) 
 #endif
 
@@ -44,7 +45,7 @@ Fast power mod function taken from Applied Cryptography by Bruce Schneier.
 It makes use of the powers of two present in \f$ b \f$ to compute the result.
 
 Template arguments
-    - Integral - Some integer type
+    - class Integral - Some integer type
 
 \param[in] a
 \param[in] b
@@ -78,7 +79,7 @@ exception if that is the case. Specialize this template for any type which
 cannot be used with std::numeric_limits.
 
 Template arguments
-    - Integral - Some integer type
+    - class Integral - Some integer type
 
 \param[in] a
 \param[in] b
@@ -102,7 +103,7 @@ Uses the Euclidian gcd formula. If a % b is non-0, then the solution is the same
 gcd(b, a % b)
 
 Template arguments
-    - Integral - Some integer type
+    - class Integral - Some integer type
  
 \param[in] a
 \param[in] b
@@ -122,7 +123,7 @@ Integral _unsignedgcd(const Integral& a, const Integral& b)
 If a or b is 0, the other is returned. gcd(0, 0) returns 0.
 
 Template arguments
-    - Integral - Some integer type
+    - class Integral - Some integer type
 
 \param[in] a
 \param[in] b
@@ -153,7 +154,7 @@ For each iteration until a % b = 0
     - \f$ b, a = a%b, b \f$ 
 
 Template arguments
-    - Integral - Some integer type
+    - class Integral - Some integer type
 
 \param[in] a_
 \param[in] b_
@@ -224,7 +225,7 @@ Using the extended gcd of a and n, if a and n are relatively prime, then the sol
 the equation \f$ ax + ny = 1 \f$
 
 Template arguments
-    - Integral - Some integer type
+    - class Integral - Some integer type
 
 \param[in] a
 \param[in] n
@@ -248,7 +249,7 @@ Integral inverseMod(const Integral& a, const Integral& n)
 The Legendre symbol \f$ (\frac{a}{p}) \f$ is defined as \f$ a^{(p-1)/2} \f$ mod \f$ p \f$ for prime values \f$ p \f$
 
 Template arguments
-    - Integral - Some integer type
+    - class Integral - Some integer type
 
 \param[in] a
 \param[in] p A prime number
@@ -271,7 +272,7 @@ law of Quadratic Reciprocity to calculate the Jacobi without factoring \f$ n \f$
 be found at http://2000clicks.com/mathhelp/NumberTh27JacobiSymbolAlgorithm.aspx
 
 Template arguments
-    - Integral - Some signed integer type
+    - class Integral - Some signed integer type
 
 \param[in] a
 \param[in] n - Some odd integer
@@ -325,7 +326,7 @@ exception if the template type is strictly unsigned. Specialize this for any typ
 which cannot be checked with std::is_unsigned
 
 Template arguments
-    - Integral - Some integral type
+    - class Integral - Some integral type
 
 \param[in] a
 \param[in] n - Some odd integer

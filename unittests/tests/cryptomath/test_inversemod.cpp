@@ -10,6 +10,18 @@
 using namespace std;
 using namespace cryptomath;
 
+/*!
+    \test Tests finding the inverse of a value mod n
+        - 18 mod 8
+        - 4 mod 13
+        - 15 mod 26
+        - 19 mod 26
+        - 11 mod 26
+
+    Tests finding inverse mod n using mpz_class type
+        - 3 mod 2
+        - 18000 mod 533000389
+*/
 TEST_CASE("The inverseMod function")
 {
     SECTION("18^-1 (mod 8)")

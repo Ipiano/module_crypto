@@ -14,6 +14,18 @@
 using namespace std;
 using namespace cryptomath;
 
+/*!
+    \test Tests the primitive root test function and that it works with GMP
+        - Roots of 0, 1
+        - Roots of 2, 3, 4
+        - Roots of 7
+        - Roots of 62
+        - Roots of 31
+        - Roots of 49
+        - Roots of 50
+        - Roots of 63
+        - Roots of 27
+*/
 TEST_CASE("The isPrimitiveRoots function")
 {
     SECTION("Primitive roots mod 0-1")

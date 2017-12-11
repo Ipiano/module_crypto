@@ -12,6 +12,35 @@
 using namespace std;
 using namespace cryptomath;
 
+/*!
+    \test Tests that powers of 2 can be factored out of values
+        - Powers of 2
+            - 0
+            - 1
+            - 2
+            - 4
+            - 8
+            - \f$ 2^18 \f$
+            - \f$ 2^25 \f$
+        - Odd numbers
+            - 3
+            - 5
+            - 387
+            - 3298457
+            - 32343
+        - Even non-powers of 2
+            - 56
+            - 636416
+            - 186336
+            - 1580928
+            - 15708
+        
+    Tests that the following numbers can have 2's factored out
+    with mpz_class type
+        - 636416
+        - 33554432
+        - 32343
+*/
 TEST_CASE("The factor2s function")
 {
     SECTION("Powers of 2")

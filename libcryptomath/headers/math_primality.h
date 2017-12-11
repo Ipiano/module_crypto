@@ -11,6 +11,7 @@
 #include "./math_modulararith.h"
 
 #ifndef DBGOUT
+/*! Removes verbose debug outputs from compiled result */
     #define DBGOUT(a) 
 #endif
 
@@ -23,7 +24,7 @@ Many factoring and primality tests only work with odd integers. This
 function divides all powers of two out of a number
 
 Template arguments
-    - Integral - Some integer type
+    - class Integral - Some integer type
 
 \param[in] n - The number to factor 2's from 
 \returns pair<Integral, Integral> - [number of 2's factored out, n with all powers of 2 factored out]
@@ -62,7 +63,7 @@ For all \f$ i, j \f$ greater than equal to 1, where \f$ i+j+2ij\f$ is less than 
 For all remaining values, \f$ i \f$, \f$ 2i + 1 \f$ is prime.
 
 Template arguments
-    - Integral - Some integer type
+    - class Integral - Some integer type which can be used to index into a vector (mpz_class will not work)
 
 \param[in] n - Number to find primes less than
 \param[out] result - Vector to store results in
@@ -103,7 +104,7 @@ namespace primality
     The chance this test returns a false positive is (1/4)^iterations
 
     Template arguments
-        - Integral - Some integer type
+        - class Integral - Some integer type
 
     \param[in] n - The number to test for primality
     \param[in] iterations - The number of witness values to test (Default 10)
@@ -114,7 +115,7 @@ namespace primality
     {
         DBGOUT("MillerRabin(" << n << ")");
         auto t = std::chrono::system_clock::now();
-        std::mt19937_64 reng(chrono::duration_cast<chrono::milliseconds>(t.time_since_epoch()).count());
+        std::mt19937_64 reng(std::chrono::duration_cast<std::chrono::milliseconds>(t.time_since_epoch()).count());
         std::uniform_int_distribution<uint64_t> dist(2);
 
         std::pair<Integral, Integral> rd = factor2s<Integral>(n-1);
@@ -176,7 +177,7 @@ namespace primality
     The chance this test returns a false positive is (1/2)^iterations
 
     Template arguments
-        - Integral - Some integer type
+        - class Integral - Some integer type
 
     \param[in] n - The number to test for primality
     \param[in] iterations - The number of witness values to test (Default 10)
@@ -215,7 +216,7 @@ This prime test function uses one of the prime tests in the primality namespace 
 are checked for first; anything less than 3 or even is hard-coded.
 
 Template arguments
-    - Integral - Some integer type
+    - class Integral - Some integer type
 
 \param[in] n The number to test for primality
 \param[in] test Which primality test to use
@@ -275,8 +276,8 @@ If that prime has too many bits, it is divided in half and the first prime great
 The Miller-Rabin primality test is used to find the first bigger prime.
 
 Template arguments
-    - Integral - Some integer type
-    - UniformRandomBitGenerator - Some type meeting the C++ UniformRandomBitGenerator specification
+    - class Integral - Some integer type
+    - class UniformRandomBitGenerator - Some type meeting the C++ UniformRandomBitGenerator specification
 
 \param[in, out] bits - A random bit generator
 \param[in] bitcount - Number of bits in final value
@@ -320,8 +321,8 @@ Integral _randomPrime(UniformRandomBitGenerator& bits, const uint64_t& bitcount,
 For non-standard types, specialize the hasBits templated function to verify that a type can be used
 
 Template arguments
-    - Integral - Some integer type
-    - UniformRandomBitGenerator - Some type meeting the C++ UniformRandomBitGenerator specification
+    - class Integral - Some integer type
+    - class UniformRandomBitGenerator - Some type meeting the C++ UniformRandomBitGenerator specification
 
 \param[in, out] bits - A random bit generator
 \param[in] bitcount - Number of bits in final value

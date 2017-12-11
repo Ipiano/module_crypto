@@ -7,6 +7,10 @@
 using namespace std;
 using namespace cryptomath;
 
+/*! 
+    \test Tests the sieve of Sundaram for 20 and 1292. GMP is not tested because
+    it cannot be used in this function
+*/
 TEST_CASE("The Sieve of Sundaram")
 {
     SECTION("20")

@@ -11,6 +11,12 @@
 
 using namespace std;
 
+/*!
+    \test Confirms that the affine cipher transformer will
+    throw exceptions if
+        - The alphabet is invalid
+        - a mod n is not 1
+*/
 TEST_CASE("Affine cipher errors")
 {
     SECTION("Empty alphabet")
@@ -31,6 +37,11 @@ TEST_CASE("Affine cipher errors")
     };
 };
 
+/*!
+    \test Confirms that the affine cipher can be used
+    to encrypt a number of texts, using a number of different
+    base alphabets and keys
+*/
 TEST_CASE("Affine cipher encrypt")
 {
     SECTION("Alphabet = abcdefghijklmnopqrstuvwxyz")
@@ -78,6 +89,11 @@ TEST_CASE("Affine cipher encrypt")
     };
 };
 
+/*!
+    \test Confirms that the affine cipher can be used
+    to decrypt a number of texts, using a number of different
+    base alphabets and keys
+*/
 TEST_CASE("Affine cipher decrypt")
 {
     SECTION("Alphabet = abcdefghijklmnopqrstuvwxyz")

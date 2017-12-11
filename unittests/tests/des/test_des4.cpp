@@ -11,6 +11,15 @@ using namespace std;
 using namespace des4;
 using namespace _internal;
 
+/*!
+    \test Tests that the internal functions for the simplified
+    DES work correctly. Specifically
+        - Expansion function
+        - Foward key rotation
+        - Backward key rotation
+        - The F function
+        - Rounds
+*/
 TEST_CASE("DES4 Internals")
 {
     SECTION("Expansion")
@@ -50,6 +59,14 @@ TEST_CASE("DES4 Internals")
     }
 };
 
+/*!
+    \test Tests that the simplified DES 3-round crack function works.
+    Keys tested
+        - 0
+        - 141
+        - 256
+        - 010011010
+*/
 TEST_CASE("3 Round Crack")
 {
     SECTION("Key = 0")
@@ -105,6 +122,15 @@ TEST_CASE("3 Round Crack")
     }
 }
 
+/*!
+    \test Tests that the simplified DES 4-round crack function works.
+    Keys tested
+        - 0
+        - 141
+        - 256
+        - 010011010
+        - 101110000
+*/
 TEST_CASE("4 Round Crack")
 {
     SECTION("Key = 0")

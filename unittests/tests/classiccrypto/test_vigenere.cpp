@@ -11,6 +11,10 @@
 
 using namespace std;
 
+/*!
+    \test Confirms that the vigenere cipher transformer will
+    throw an exception if either alphabet is invalid
+*/
 TEST_CASE("Vigenere cipher errors")
 {
     SECTION("Empty alphabet")
@@ -41,6 +45,10 @@ TEST_CASE("Vigenere cipher errors")
     };
 };
 
+/*!
+    \test Confirms that the vigenere cipher transformer can be used
+    to encrypt the text 'here is how it works' with the key 'vector'
+*/
 TEST_CASE("Vigenere cipher encrypt")
 {
     SECTION("Alphabet = abcdefghijklmnopqrstuvwxyz")
@@ -54,6 +62,10 @@ TEST_CASE("Vigenere cipher encrypt")
     };
 };
 
+/*!
+    \test Confirms that the vigenere cipher transformer can be used
+    to decrypt the text 'here is how it works' with the key 'vector'
+*/
 TEST_CASE("Vigenere cipher decrypt")
 {
     SECTION("Alphabet = abcdefghijklmnopqrstuvwxyz")

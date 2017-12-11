@@ -9,6 +9,11 @@ namespace des64
 {
     namespace _internal
     {
+        /*!
+            \param[in] ri Right half of block i
+            \param[in] ki Key for round i
+            \returns uint64_t
+        */
         uint64_t F(uint64_t ri, const uint64_t& ki)
         {
             DBG(cerr << "F(" << bin(ri) << ")" << endl);
@@ -33,6 +38,11 @@ namespace des64
             return C;
         }        
 
+        /*!
+            \param[in] block The block to perform a round on
+            \param[in] ki The key for the round
+            \returns uint64_t - The resulting block
+        */
         uint64_t round(uint64_t block, const uint64_t& ki)
         {
             uint64_t l = (block >> 32);
@@ -41,6 +51,15 @@ namespace des64
             return (r << 32) | (l ^ F(r, ki));
         }
 
+        /*!
+            A DES key contain 64 bits, but only 56
+            are used. Every 8th bit is used as a parity of
+            the 7 bits preceeding it. Every bytes of the
+            DES key should contain an odd number of 1 bits.
+
+            \param[in] key - The 64-bit key to check
+            \returns bool - Whether or not the parity passed
+        */
         bool parity_check(uint64_t key)
         {
             for(uint8_t i=0; i<8; i++)
@@ -56,6 +75,14 @@ namespace des64
             return true;
         }
 
+        /*!
+            Keys are generated from the initial 64-bit key by a combination
+            of shifting the original key and then permuting the 58 non-parity bits
+
+            \param[in] key - The 64-bit key to start with
+            \returns array<uint64_t, 16> - 16 Round keys
+            \throws logic_error : The key parity check failed
+        */
         array<uint64_t, 16> make_keys(uint64_t key)
         {
             using namespace _internal;
@@ -84,6 +111,19 @@ namespace des64
         }        
     }
 
+    /*!
+        The encryption process is as follows
+            - Generate 16 round keys
+            - Apply the initial permutation to the block
+            - Encrypt the block with 16 rounds, using the keys in order
+            - Swap the left and right halves of the block
+            - Apply the inverse of the initial permutation
+
+        \param[in] block The data to encrypt
+        \param[in] key The 64-bit DES key
+        \returns uint64_t - The encrypted block
+        \throws logic_error : The key does not pass the parity check
+    */
     uint64_t encrypt(uint64_t block, const uint64_t& key)
     {
         using namespace _internal;
@@ -112,6 +152,19 @@ namespace des64
         return block;
     }
 
+    /*!
+        The decryption process is as follows
+            - Generate 16 round keys
+            - Apply the initial permutation to the block
+            - Decrypt the block with 16 rounds, using the keys in reverse order
+            - Swap the left and right halves of the block
+            - Apply the inverse of the initial permutation
+
+        \param[in] block The data to decrypt
+        \param[in] key The 64-bit DES key
+        \returns uint64_t - The decrypted block
+        \throws logic_error : The key does not pass the parity check
+    */
     uint64_t decrypt(uint64_t block, const uint64_t& key)
     {
         using namespace _internal;

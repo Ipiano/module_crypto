@@ -13,6 +13,22 @@
 using namespace std;
 using namespace cryptomath;
 
+/*!
+    \test Tests that the extended gcd works for a set of cases as well as that it works with the mpz_class type
+        - 482, 1180
+        - 1180, 482
+        - -482, 1180
+        - 482, -1180
+        - -1180, 482
+        - 1180, -482
+        - -482, -1180
+        - -1180, -482
+        - 67, 17
+        - -4, 0
+        - 0, -4
+        - 0, 4
+        - 4, 0
+*/
 TEST_CASE("The extended gcd function")
 {
     SECTION("Extended GCD(482, 1180)")

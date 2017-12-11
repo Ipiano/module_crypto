@@ -1,20 +1,32 @@
+/*! \file */
 #pragma once
 
 #include <array>
 #include <string>
 
 #ifndef DEBUG
+    /*! Removes verbose debug outputs from compiled result */
     #define DBG(a) 
 #else
     #include <iostream>
     #include <iomanip>
+    /*! Enables verbose debug outputs from compiled result */
     #define DBG(a) a
 #endif
 
+//! Namespace for full DES functionality
 namespace des64
 {
+    //! Namespace for internal DES functions; these are not intended to be called by a user
     namespace _internal
     {
+        /*! Converts a value to its binary representation
+
+        \param[in] n The value to represent in binary
+        \returns string - The binary representation of n
+        Template arguments
+            - class T - The type of value being converted. This should be some integral type
+        */
         template<class T>
         std::string bin(T n)
         {
@@ -24,27 +36,42 @@ namespace des64
             return out;
         }
 
-        //O = number of bits in output of permutation
+        /*! \brief Typedef for a permutation used by the DES.
+
+            Permutations are used in the DES to transform values
+            bitwise. They may result in more or fewer bits than the
+            input. 
+
+            An example permutation [0, 2, 31, 23] would take a 32-bit number, 
+            and output a 4-bit number consisting of bits 0, 2, 31, and 23 of the input
+
+            Template arguments
+                - uint64_t O - Number of bits in output type
+        */
         template<uint64_t O>
         using permutation = std::array<int8_t, O>;
 
+        //! Definition of the initial permutation
         const permutation<64> IP 
         {{58, 50, 42, 34, 26, 18, 10, 2, 60, 52, 44, 36, 28, 20, 12, 4,
         62, 54, 46, 38, 30, 22, 14, 6, 64, 56, 48, 40, 32, 24, 16, 8,
         57, 49, 41, 33, 25, 17, 9, 1, 59, 51, 43, 35, 27, 19, 11, 3,
         61, 53, 45, 37, 29, 21, 13, 5, 63, 55, 47, 39, 31, 23, 15, 7}};
 
+        //! Definition of the initial permutation inverse
         const permutation<64> IP_INV 
         {{40, 8, 48, 16, 56, 24, 64, 32, 39, 7, 47, 15, 55, 23, 63, 31,
         38, 6, 46, 14, 54, 22, 62, 30, 37, 5, 45, 13, 53, 21, 61, 29, 
         36, 4, 44, 12, 52, 20, 60, 28, 35, 3, 43, 11, 51, 19, 59, 27, 
         34, 2, 42, 10, 50, 18, 58, 26, 33, 1, 41, 9, 49, 17, 57, 25}};
 
+        //! Definition of the expansion function
         const permutation<48> EXPAND 
         {{32, 1, 2, 3, 4, 5, 4, 5, 6, 7, 8, 9, 8, 9, 10, 11, 12, 13, 12,
         13, 14, 15, 16, 17, 16, 17, 18, 19, 20, 21, 20, 21, 22, 23, 24,
         25, 24, 25, 26, 27, 28, 29, 28, 29, 30, 31, 32, 1}};
 
+        //! Definition of the permuation of the C blocks before the application of the F function
         const permutation<32> C_PERMUTE 
         {{16, 7, 20, 21,
           29, 12, 28, 17,
@@ -54,24 +81,33 @@ namespace des64
           32, 27, 3, 9, 
           19, 13, 30, 6, 
           22, 11, 4, 25}};
-                                
+        
+        //! Definition of the key permutation to discard parity bits
         const permutation<56> KEY_PERMUTE 
         {{57, 49, 41, 33, 25, 17, 9, 1, 58, 50, 42, 34, 26, 18, 10, 2, 59, 51,
         43, 35, 27, 19, 11, 3, 60, 52, 44, 36, 63, 55, 47, 39, 31, 23, 15, 7,
         62, 54, 46, 38, 30, 22, 14, 6, 61, 53, 45, 37, 29, 21, 13, 5, 28, 20, 12, 4}};
 
+        //! Definition of how far to shift the key on each round
         const std::array<uint8_t, 16> KEY_SHIFTS
         {{1, 1, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 1}};
 
+        //! Definition of the permutation for getting bits out of the key to generate \f$ k_i \f$
         const permutation<48> KEY_CHOOSE
         {{14, 17, 11, 24, 1, 5, 3, 28, 15, 6, 21, 10, 23, 19, 12, 4, 26, 8, 16, 7,
         27, 20, 13, 2, 41, 52, 31, 37, 47, 55, 30, 40, 51, 45, 33, 48, 44, 49, 39, 
         56, 34, 53, 46, 42, 50, 36, 29, 32}};
 
-        /******************************************************//*
-            The commented block here transforms the original SBOXES
-            into an easier format
-        /******************************************************//*
+        //! Template for type representing an S-Box
+        typedef std::array<uint8_t, 64> S_BOX;    
+
+        /*! \brief The S-Boxes
+
+        Since the S-Boxes are indexed first by the first and last bit of 6-bits, and then by
+        the middle 4 bits, the following program was used to reorder the S-Boxes so they can
+        be indexed into directly from an 8-bit value
+
+        \code
         typedef array<uint8_t, 64> S_BOX;
         const array<S_BOX, 8> S_BOXES
         {{
@@ -103,8 +139,8 @@ namespace des64
 
             return 0;
         }
+        \endcode
         */
-        typedef std::array<uint8_t, 64> S_BOX;
         const std::array<S_BOX, 8> S_BOXES{{
                 {{14, 0, 4, 15, 13, 7, 1, 4, 2, 14, 15, 2, 11, 13, 8, 1,
                 3, 10, 10, 6, 6, 12, 12, 11, 5, 9, 9, 5, 0, 3, 7, 8,
@@ -147,10 +183,20 @@ namespace des64
                 0, 15, 6, 12, 10, 9, 13, 0, 15, 3, 3, 5, 5, 6, 8, 11}}
         }};      
 
-        //I = number of bits in input
-        //O = number of bits in output
-        //result = result type; must have at least O bits
-        //  result is in rightmost O bits
+        /*! General permutation function
+        
+        This function takes a number and permutes it according to one
+        of the permuation arrays defined for the DES
+
+        Template arguments
+            - uint64_t I - number of bits in input
+            - uint64_t O - number of bits in output
+            - class result - result type; must have at least O bits
+
+        \param[in] block Data to permute
+        \param[in] table Permutation table
+        \returns result - The input permuted according to the table
+        */
         template<uint64_t I, uint64_t O, class result = uint64_t>
         result permute(const uint64_t& block, const permutation<O>& table)
         {
@@ -171,21 +217,37 @@ namespace des64
             return out;
         }
 
+        /*! \brief Rotate left function
+
+        Template arguments
+            - uint64_t B - Number of bits to rotate
+
+        \param[in] i Bits to rotate
+        \param[in] n Distance to rotate
+        \returns uint64_t i <<< n
+        */
         template<uint64_t B>
         uint64_t rotate_left(const uint64_t& i, const uint64_t& n)
         {
             return (i << n) | (i >> (B - n));
         }
 
+        //! Checks the parity bits of a DES key
         bool parity_check(uint64_t key);
 
+        //! Performs a DES round
         uint64_t round(uint64_t block, const uint64_t& ki);
 
+        //! Generates all 16 keys for the DES
         std::array<uint64_t, 16> make_keys(uint64_t key);
 
+        //! The DES F function
         uint64_t F(uint64_t ri, const uint64_t& ki);
     }
 
+    //! Encrypts a block with the key in 16 rounds
     uint64_t encrypt(uint64_t block, const uint64_t& key);
+
+    //! Decrypts a block with the key in 16 rounds
     uint64_t decrypt(uint64_t block, const uint64_t& key);
 }

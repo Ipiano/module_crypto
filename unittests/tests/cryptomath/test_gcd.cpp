@@ -10,6 +10,12 @@
 using namespace std;
 using namespace cryptomath;
 
+/*!
+    \test Tests edge cases of the GCD.
+        - GCD(0, n)
+        - GCD(n, 0)
+        - GCD(0, 0)
+*/
 TEST_CASE("Gcd edge cases")
 {
     SECTION("GCD(0, 10)")
@@ -30,6 +36,11 @@ TEST_CASE("Gcd edge cases")
         REQUIRE(soln == 0);
     }
 }
+/*!
+    \test Tests a case with the GCD both with and without GMP
+        - 484, 1180
+        - 1180, 484
+*/
 TEST_CASE("The gcd function")
 {
     SECTION("GCD(482, 1180)")

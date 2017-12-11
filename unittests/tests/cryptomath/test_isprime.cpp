@@ -10,6 +10,21 @@
 using namespace std;
 using namespace cryptomath;
 
+/*!
+    \test Tests primality tests and that it can be used with GMP
+        - Prime numbers
+            - 2, 3, 5,7, 11, 13
+            - 15761
+            - 27179
+            - 38699
+            - 57719
+        - Non-Prime numbers
+            - 0, 1, 4, 8, 21
+            - 96083
+            - 87699
+            - 44175
+            - 57725
+*/
 TEST_CASE("The isPrime function")
 {
     SECTION("Prime numbers")

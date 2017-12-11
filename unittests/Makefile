@@ -9,7 +9,7 @@ PROJECT_ROOT = $(PWD)/..
 CRYPTO_ROOT = $(PROJECT_ROOT)
 CRYPTO_LIBS = random cryptomath classiccrypto des
 
-BUILD_TYPE ?= debug
+BUILD_TYPE ?= release
 BUILD_DIR = $(PROJECT_ROOT)/build/$(BUILD_TYPE)
 OBJECTS_DIR = $(BUILD_DIR)/objects
 LIBS_DIR = $(BUILD_DIR)/lib

@@ -10,6 +10,20 @@
 using namespace std;
 using namespace cryptomath;
 
+/*!
+    Tests the modulus function and that it can be used with GMP
+        - 5 mod 3
+        - -5 mod 3
+        - 5 mod -3
+        - -5 mod 3
+        - -10 mod 3
+        - 10 mod 3
+        - 15 mod 3
+        - -15 mod 3
+        - 3 mod 3
+        - -3 mod 3
+        - 0 mod 3
+*/
 TEST_CASE("The mod function")
 {
     SECTION("5 (mod 3)")
@@ -34,12 +48,6 @@ TEST_CASE("The mod function")
     {
         int soln = mod(-5, -3);
         REQUIRE(soln == -2);
-    }
-
-    SECTION("5 (mod -3)")
-    {
-        int soln = mod(5, -3);
-        REQUIRE(soln == -1);
     }
 
     SECTION("10 (mod 3)")
