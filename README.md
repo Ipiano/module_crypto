@@ -27,6 +27,24 @@ Wade Trappe and Lawrence C. Washington. This book was the main reference used fo
 DISCLAIMER: This library is not written to follow any specific cryptographic standards. It exists
 to demonstrate an understanding of the concepts and theory which the subject is founded on.
 
+### Personal Background
+The requirements on this project were very general; all we were given was a list of things that it had to be capable
+of doing. The language and user-interfaces were left completely open. I chose to do the project entirely in C++ for
+a number of reasons
+    
+    - It seems to me, if you're writing a cryptographic library, you would want it to run quickly;
+        C++ usually outperforms other languages
+    - I knew using a multi-precision library would be useful, and I wanted to challenge myself
+        to make the project with with or without it
+    - I knew very little about writing makefiles (and still do, but now I know more), and since
+        C++ is my language of choice, I wanted to learn some of the black magic that goes into them and
+        come up with a modular way of writing makefiles so I can easily re-use my code libraries
+        in the future
+    
+This project was a major learning experience for me; I'd never written any in-depth makefiles, or used git submodules before. Aside from the fact that I was learning all of the cryptography and coding theory for the first time, I was teaching myself a lot about some of the more tedious aspects of building a library like this.
+
+I hope you find the project to be useful, either as a learning tool, as a starting point for some number-theory project you're doing, or even as an example of how to write ridiculous and convoluted makefiles. I've really enjoyed the experience of putting it all together (as stressful as it may have been at times) and think it could be a useful set of tools to have for myself and others.
+
 ### Classic Cryptography
 The classic cryptography portion of the library contains encryption and decryption mechanisms for
 the following ciphers, as well as a general-purpose frequency-analysis counter.
